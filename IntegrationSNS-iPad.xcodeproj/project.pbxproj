@@ -17,6 +17,8 @@
 		773AB10419CF251D009B46BA /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 773AB10319CF251D009B46BA /* Accounts.framework */; };
 		773AB10619CF2525009B46BA /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 773AB10519CF2525009B46BA /* Social.framework */; };
 		773AB10819CF253C009B46BA /* FacebookSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 773AB10719CF253C009B46BA /* FacebookSDK.framework */; };
+		77F2521719CF31C100DC9DEF /* MODropAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F2521419CF31C100DC9DEF /* MODropAlertView.m */; };
+		77F2521819CF31C100DC9DEF /* UIImage+ImageEffects.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F2521619CF31C100DC9DEF /* UIImage+ImageEffects.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +48,10 @@
 		773AB10319CF251D009B46BA /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
 		773AB10519CF2525009B46BA /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
 		773AB10719CF253C009B46BA /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = ../../Documents/FacebookSDK/FacebookSDK.framework; sourceTree = "<group>"; };
+		77F2521319CF31C100DC9DEF /* MODropAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MODropAlertView.h; sourceTree = "<group>"; };
+		77F2521419CF31C100DC9DEF /* MODropAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MODropAlertView.m; sourceTree = "<group>"; };
+		77F2521519CF31C100DC9DEF /* UIImage+ImageEffects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ImageEffects.h"; sourceTree = "<group>"; };
+		77F2521619CF31C100DC9DEF /* UIImage+ImageEffects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ImageEffects.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +103,7 @@
 				773AB0E019CF24BC009B46BA /* AppDelegate.m */,
 				773AB0E219CF24BC009B46BA /* ViewController.h */,
 				773AB0E319CF24BC009B46BA /* ViewController.m */,
+				77F2521219CF31C100DC9DEF /* MODropAlert */,
 				773AB0E519CF24BC009B46BA /* Main.storyboard */,
 				773AB0E819CF24BC009B46BA /* Images.xcassets */,
 				773AB0EA19CF24BC009B46BA /* LaunchScreen.xib */,
@@ -129,6 +136,17 @@
 				773AB0F619CF24BC009B46BA /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		77F2521219CF31C100DC9DEF /* MODropAlert */ = {
+			isa = PBXGroup;
+			children = (
+				77F2521319CF31C100DC9DEF /* MODropAlertView.h */,
+				77F2521419CF31C100DC9DEF /* MODropAlertView.m */,
+				77F2521519CF31C100DC9DEF /* UIImage+ImageEffects.h */,
+				77F2521619CF31C100DC9DEF /* UIImage+ImageEffects.m */,
+			);
+			path = MODropAlert;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -231,6 +249,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77F2521719CF31C100DC9DEF /* MODropAlertView.m in Sources */,
+				77F2521819CF31C100DC9DEF /* UIImage+ImageEffects.m in Sources */,
 				773AB0E419CF24BC009B46BA /* ViewController.m in Sources */,
 				773AB0E119CF24BC009B46BA /* AppDelegate.m in Sources */,
 				773AB0DE19CF24BC009B46BA /* main.m in Sources */,

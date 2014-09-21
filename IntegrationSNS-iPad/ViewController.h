@@ -10,6 +10,7 @@
 #import <Accounts/Accounts.h>
 #import <Social/Social.h>
 #import <FacebookSDK/FacebookSDK.h>
+#import "MODropAlertView.h"
 
 @interface ViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate>{
     
