@@ -48,6 +48,7 @@
 		773AB10319CF251D009B46BA /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
 		773AB10519CF2525009B46BA /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
 		773AB10719CF253C009B46BA /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = ../../Documents/FacebookSDK/FacebookSDK.framework; sourceTree = "<group>"; };
+		77D4D13A19D0612300A5BA35 /* IntegrationSNS-iPad.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "IntegrationSNS-iPad.entitlements"; sourceTree = "<group>"; };
 		77F2521319CF31C100DC9DEF /* MODropAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MODropAlertView.h; sourceTree = "<group>"; };
 		77F2521419CF31C100DC9DEF /* MODropAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MODropAlertView.m; sourceTree = "<group>"; };
 		77F2521519CF31C100DC9DEF /* UIImage+ImageEffects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ImageEffects.h"; sourceTree = "<group>"; };
@@ -99,6 +100,7 @@
 		773AB0DA19CF24BC009B46BA /* IntegrationSNS-iPad */ = {
 			isa = PBXGroup;
 			children = (
+				77D4D13A19D0612300A5BA35 /* IntegrationSNS-iPad.entitlements */,
 				773AB0DF19CF24BC009B46BA /* AppDelegate.h */,
 				773AB0E019CF24BC009B46BA /* AppDelegate.m */,
 				773AB0E219CF24BC009B46BA /* ViewController.h */,
@@ -198,6 +200,12 @@
 				TargetAttributes = {
 					773AB0D719CF24BC009B46BA = {
 						CreatedOnToolsVersion = 6.0;
+						DevelopmentTeam = KB9Y4MNM98;
+						SystemCapabilities = {
+							com.apple.iCloud = {
+								enabled = 0;
+							};
+						};
 					};
 					773AB0F019CF24BC009B46BA = {
 						CreatedOnToolsVersion = 6.0;
@@ -377,6 +385,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/ryosuke/Documents/FacebookSDK,
@@ -391,6 +400,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/ryosuke/Documents/FacebookSDK,
