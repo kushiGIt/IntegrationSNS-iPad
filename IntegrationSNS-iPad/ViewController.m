@@ -58,12 +58,12 @@
 -(void)getFaceBookTimeLine{
     ACAccountStore *accountStore = [[ACAccountStore alloc] init];
     ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierFacebook];
-    NSDictionary *options = @{ ACFacebookAppIdKey : @"1695130440712382",ACFacebookAudienceKey : ACFacebookAudienceOnlyMe,ACFacebookPermissionsKey:@[@"email",@"like",@"read_stream"]};
     
-    [accountStore requestAccessToAccountsWithType:accountType options:options completion:^(BOOL granted, NSError *error) {
-        if (granted==YES) {
+    NSDictionary*readOnlyOptions=@{ ACFacebookAppIdKey : @"1695130440712382",ACFacebookAudienceKey : ACFacebookAudienceOnlyMe,ACFacebookPermissionsKey:@[@"email"]};
+    [accountStore requestAccessToAccountsWithType:accountType options:readOnlyOptions completion:^(BOOL granted, NSError *error){
+        if (granted) {
             NSArray *facebookAccounts = [accountStore accountsWithAccountType:accountType];
-            if (facebookAccounts.count > 0) {
+            if (facebookAccounts.count>0) {
                 ACAccount *facebookAccount = [facebookAccounts lastObject];
                 //Get AccessToken
                 ACAccountCredential *facebookCredential = [facebookAccount credential];
@@ -118,21 +118,13 @@
                         NSLog(@"Likes_Count=%lu",(unsigned long)[[[[[newsfeed valueForKey:@"data"]valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i]count]);
                     }
                 }
-                
+
             }else{
-                
-                 NSLog(@"a %@",error);
-                UIAlertView*noAccountAlert=[[UIAlertView alloc]initWithTitle:@"Facebook account" message:@"アカウントを見つけることができませんでした。今すぐ「設定」でアカウントを設定しますか？" delegate:self cancelButtonTitle:@"いいえ" otherButtonTitles:@"はい", nil];
-                [noAccountAlert show];
-                alertOpe=10;
+                NSLog(@"a");
             }
-        } else {
-            NSLog(@"b %@",error);
-            UIAlertView*noGrantedAlert=[[UIAlertView alloc]initWithTitle:@"Facebook account" message:@"アカウントアクセスが拒否になってます。今すぐ「設定」でアカウントを再設定しますか？" delegate:self cancelButtonTitle:@"いいえ" otherButtonTitles:@"はい", nil];
-            [noGrantedAlert show];
-            alertOpe=10;
+        }else{
+            NSLog(@"b");
         }
-        
     }];
 }
 
