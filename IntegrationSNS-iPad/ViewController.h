@@ -12,7 +12,7 @@
 #import <FacebookSDK/FacebookSDK.h>
 #import "MODropAlertView.h"
 
-@interface ViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate>{
+@interface ViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate,MODropAlertViewDelegate>{
     
 }
 

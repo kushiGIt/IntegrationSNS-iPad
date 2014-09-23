@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>58E63BA6-663E-4D3A-A41D-3D1E0072C707</string>
+	<key>IDESourceControlProjectName</key>
+	<string>IntegrationSNS-iPad</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>DBAF932CA95B1072AE612D45C6A3F2CEEC0D180B</key>
+		<string>https://github.com/kushiGIt/IntegrationSNS-iPad.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>IntegrationSNS-iPad.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>DBAF932CA95B1072AE612D45C6A3F2CEEC0D180B</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/kushiGIt/IntegrationSNS-iPad.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>DBAF932CA95B1072AE612D45C6A3F2CEEC0D180B</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>DBAF932CA95B1072AE612D45C6A3F2CEEC0D180B</string>
+			<key>IDESourceControlWCCName</key>
+			<string>IntegrationSNS-iPad</string>
+		</dict>
+	</array>
+</dict>
+</plist>

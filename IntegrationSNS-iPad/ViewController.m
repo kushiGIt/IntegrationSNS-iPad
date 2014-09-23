@@ -14,7 +14,6 @@
     NSMutableArray *tweetIconArray;
     NSMutableArray *dateArray;
     UITableView *tableView;
-    int alertOpe;
 }
 
 @end
@@ -31,8 +30,8 @@
     tweetIconArray=[[NSMutableArray alloc]init];
     dateArray=[[NSMutableArray alloc]init];
     //[self getTwitterTimeline];
-    [self getFaceBookTimeLine];
-    //[self getTwitterTimeline];
+    //[self getFaceBookTimeLine];
+    [self getTwitterTimeline];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -54,13 +53,14 @@
 -(IBAction)backToTop{
     [self dismissViewControllerAnimated:YES completion:nil];
 }
-#pragma mark --------
+#pragma mark - Get timeline
+#pragma mark Get facebook timeline
 -(void)getFaceBookTimeLine{
     ACAccountStore *accountStore = [[ACAccountStore alloc] init];
     ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierFacebook];
     
     NSDictionary*readOnlyOptions=@{ ACFacebookAppIdKey : @"1695130440712382",ACFacebookAudienceKey : ACFacebookAudienceOnlyMe,ACFacebookPermissionsKey:@[@"email"]};
-    [accountStore requestAccessToAccountsWithType:accountType options:readOnlyOptions completion:^(BOOL granted, NSError *error){
+    [accountStore requestAccessToAccountsWithType:accountType options:readOnlyOptions completion:^(BOOL granted, NSError *accountsError){
         if (granted) {
             NSArray *facebookAccounts = [accountStore accountsWithAccountType:accountType];
             if (facebookAccounts.count>0) {
@@ -94,23 +94,12 @@
                     //What is main_messege
                     NSLog(@"Main_Messege=%@",[NSString stringWithFormat:@"%@",[[newsfeed valueForKey:@"data"]valueForKey:@"message"][i]]);
                     //when is the messege created
-                    
-                    NSCalendar*calendar=[NSCalendar currentCalendar];
-                    NSDateComponents*components=[[NSDateComponents alloc]init];
-                    //originalString to NSInterger
-                    NSString*originalDateString=[NSString stringWithFormat:@"%@",[[newsfeed valueForKey:@"data"]valueForKey:@"created_time"][i]];
-                    NSLog(@"%@",originalDateString);
-                    components.year=[[originalDateString substringWithRange:NSMakeRange(0,4)]integerValue];
-                    components.month=[[originalDateString substringWithRange:NSMakeRange(5,2)]integerValue];
-                    components.day=[[originalDateString substringWithRange:NSMakeRange(8,2)]integerValue];
-                    components.hour=[[originalDateString substringWithRange:NSMakeRange(11,2)]integerValue];
-                    components.minute=[[originalDateString substringWithRange:NSMakeRange(14,2)]integerValue];
-                    components.second=[[originalDateString substringWithRange:NSMakeRange(17,2)]integerValue];
-                    NSLog(@"Convert results ==> %ld-%ld-%ld-%ld-%ld-%ld",components.year,components.month,components.day,components.hour,components.minute,components.second);
-                    //NSInterger to NSDate
-                    NSDate*date=[calendar dateFromComponents:components];
-                    NSLog(@"nsdate==>%@",date);
-                    
+                    NSString*Original_ISO_8601_Date=[NSString stringWithFormat:@"%@",[[newsfeed valueForKey:@"data"]valueForKey:@"created_time"][i]];
+                    NSDate* date_converted;
+                    NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
+                    [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
+                    date_converted = [formatter dateFromString:Original_ISO_8601_Date];
+                    NSLog(@"convert results=%@",date_converted);
                     //How many is this messege like_count
                     if ([[[[[newsfeed valueForKey:@"data"]valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i]isEqual:[NSNull null]]==YES) {
                         NSLog(@"Not any likes");
@@ -120,20 +109,30 @@
                 }
 
             }else{
-                NSLog(@"a");
+                [self getFacebookTimeLineErrorAlert:accountsError];
             }
         }else{
-            NSLog(@"b");
+            [self getFacebookTimeLineErrorAlert:accountsError];
         }
     }];
 }
-
+-(void)getFacebookTimeLineErrorAlert:(NSError*)error{
+    if (error) {
+        NSLog(@"%s,%@",__func__,error);
+    }else{
+        NSLog(@"========Facebook account is error========");
+    }
+    MODropAlertView *alert =[[MODropAlertView alloc]initDropAlertWithTitle:@"Facebook Account" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
+    alert.delegate=self;
+    [alert show];
+}
+#pragma mark Get Twitter timeline
 -(void)getTwitterTimeline{
     
     ACAccountStore *accountStore = [[ACAccountStore alloc] init];
     ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
     
-    [accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted, NSError *error) {
+    [accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted, NSError *accountsError) {
         
         if(granted==YES){
             NSArray *accounts = [accountStore accountsWithAccountType:accountType];
@@ -171,43 +170,38 @@
                     }
                 }];
             }else{
-                UIAlertView*noAccountAlert=[[UIAlertView alloc]initWithTitle:@"Twitter account" message:@"アカウントを見つけることができませんでした。今すぐ「設定」でアカウントを設定しますか？" delegate:self cancelButtonTitle:@"いいえ" otherButtonTitles:@"はい", nil];
-                [noAccountAlert show];
-                alertOpe=20;
+                [self getTwitterTimeLineErrorAlert:accountsError];
             }
         }else{
-            UIAlertView*noGrantedAlert=[[UIAlertView alloc]initWithTitle:@"Twitter account" message:@"アカウントアクセスが拒否になってます。今すぐ「設定」でアカウントを再設定しますか？" delegate:self cancelButtonTitle:@"いいえ" otherButtonTitles:@"はい", nil];
-            [noGrantedAlert show];
-            alertOpe=20;
+            [self getTwitterTimeLineErrorAlert:accountsError];
         }
     }];
     
 }
+-(void)getTwitterTimeLineErrorAlert:(NSError*)error{
+    if (error) {
+        NSLog(@"%s,%@",__func__,error);
+    }else{
+        NSLog(@"========Twitter account is error========");
+    }
+    MODropAlertView *alert =[[MODropAlertView alloc]initDropAlertWithTitle:@"Twitter Account" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
+    alert.delegate=self;
+    [alert show];
+}
 #pragma mark - UIAlertViewDelegate
--(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{switch (alertOpe) {
-    case 10:{
-        switch (buttonIndex) {
-            case 0:
-                break;
-            case 1:
-                [[UIApplication sharedApplication]openURL:[NSURL URLWithString:@"prefs:root=General"]];
-                break;
-        }
+-(void)alertViewPressButton:(MODropAlertView *)alertView buttonType:(DropAlertButtonType)buttonType{
+    NSLog(@"%s",__func__);
+    switch (buttonType) {
+        case DropAlertButtonOK:{
+            NSURL*url=[NSURL URLWithString:UIApplicationOpenSettingsURLString];
+            [[UIApplication sharedApplication] openURL:url];
+            break;
+            
+        }default:
+            NSLog(@"%s",__func__);
+            break;
+            
     }
-        break;
-    case 20:{
-        switch (buttonIndex) {
-            case 0:
-                break;
-            case 1:
-                [[UIApplication sharedApplication]openURL:[NSURL URLWithString:@"prefs:root=TWITTER"]];
-                
-                break;
-        }
-    }
-        break;
 }
-}
-
 
 @end
