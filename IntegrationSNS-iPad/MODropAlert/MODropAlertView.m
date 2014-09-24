@@ -186,8 +186,8 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
 - (void)makeAlertPopupView
 {
 #pragma mark set popup view!
-    CGRect frame = CGRectMake(0, 0, 400, 200);
     CGRect screen = [self mainScreenFrame];
+    CGRect frame = CGRectMake(0, 0, screen.size.width/1.92, screen.size.height*0.19);
     
     alertView = [[UIView alloc]initWithFrame:frame];
     

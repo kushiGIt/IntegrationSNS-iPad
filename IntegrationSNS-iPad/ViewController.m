@@ -30,7 +30,7 @@
     tweetIconArray=[[NSMutableArray alloc]init];
     dateArray=[[NSMutableArray alloc]init];
     //[self getTwitterTimeline];
-    //[self getFaceBookTimeLine];
+    [self getFaceBookTimeLine];
     [self getTwitterTimeline];
 }
 
@@ -133,37 +133,38 @@
     ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
     
     [accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted, NSError *accountsError) {
-        
         if(granted==YES){
             NSArray *accounts = [accountStore accountsWithAccountType:accountType];
             if (accounts != nil && [accounts count] != 0) {
                 ACAccount *twAccount = accounts[0];
                 NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/home_timeline.json"];
-                NSLog(@"%@",[url absoluteString]);
-                NSDictionary *parametersDic=@{@"include_entities": @"1",@"count": @"200"};
+                NSDictionary *parametersDic=@{@"include_entities": @"1",@"count": @"200"};//count min:20 max:200
                 SLRequest *request = [SLRequest requestForServiceType:SLServiceTypeTwitter requestMethod:SLRequestMethodGET URL:url parameters:parametersDic];
                 request.account = twAccount;
                 [request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
                     if (urlResponse){
                         NSError *jsonError;
+                        NSLog(@"Completion of receiving Twitter timeline data. Byte=%lu byte.",(unsigned long)responseData.length);
+                        //TODO:fix options
                         NSArray *timeline = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableLeaves error:&jsonError];
                         if(timeline){
-                            //                            NSString *output = [NSString stringWithFormat:@"HTTP response status: %ld",(long)[urlResponse statusCode]];
-                            //                            NSLog(@"%@", output);
-                            //                            NSLog(@"%@",timeline);
                             for (NSDictionary *tweet in timeline) {
                                 [textTweetArray addObject:[tweet valueForKey:@"text"]];
                                 NSDictionary *user = tweet[@"user"];
                                 [nameTweetArray addObject:user[@"screen_name"]];
                                 [tweetIconArray addObject:user[@"profile_image_url"]];
-                                [dateArray addObject:tweet[@"created_at"]];
+                                //TwiietrDate→NSDate Convert
+                                NSDateFormatter* inFormat = [[NSDateFormatter alloc] init];
+                                NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+                                [inFormat setLocale:locale];
+                                [inFormat setDateFormat:@"EEE MMM dd HH:mm:ss Z yyyy"];
+                                NSString*original_Twitter_Date=[NSString stringWithFormat:@"%@",tweet[@"created_at"]];
+                                NSDate *date =[inFormat dateFromString:original_Twitter_Date];
+                                [dateArray addObject:date];
                             }
-                            //===============test=================
                             for (int i=0; i<textTweetArray.count; i++) {
-                                NSLog(@"\n number==%d \n text==%@ \n user-screen_name==%@ \n user-profile_image_url==%@ \n created_at==%@ \n\n\n\n",i,textTweetArray[i],nameTweetArray[i],tweetIconArray[i],dateArray[i]);
+                                NSLog(@"\n number==%d \n text==%@ \n user-screen_name==%@ \n user-profile_image_url==%@ \n created_at=%@  \n\n\n\n",i,textTweetArray[i],nameTweetArray[i],tweetIconArray[i],dateArray[i]);
                             }
-                            //===============end==================
-                            [tableView reloadData];
                         }else{
                             NSLog(@"error: %@",jsonError);
                         }
@@ -176,7 +177,6 @@
             [self getTwitterTimeLineErrorAlert:accountsError];
         }
     }];
-    
 }
 -(void)getTwitterTimeLineErrorAlert:(NSError*)error{
     if (error) {
