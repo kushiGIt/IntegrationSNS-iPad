@@ -7,13 +7,16 @@
 //
 
 #import "ViewController.h"
+#define TIME_LANE_TABLEVIEW_VIEWTAG 1
 
 @interface ViewController (){
     NSMutableArray *textTweetArray;
     NSMutableArray *nameTweetArray;
     NSMutableArray *tweetIconArray;
     NSMutableArray *dateArray;
-    UITableView *tableView;
+    IBOutlet UITableView*mytableview;
+    NSUserDefaults*defaults;
+    NSDictionary*twitterDataDic;
 }
 
 @end
@@ -22,16 +25,24 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-    tableView.delegate=self;
-    tableView.dataSource=self;
-    textTweetArray=[[NSMutableArray alloc]init];
-    nameTweetArray=[[NSMutableArray alloc]init];
-    tweetIconArray=[[NSMutableArray alloc]init];
-    dateArray=[[NSMutableArray alloc]init];
+    //Set up NSUserDefaults
+    defaults=[NSUserDefaults standardUserDefaults];
+    
+    //Set up delegate and dataSource
+    mytableview.delegate=self;
+    mytableview.dataSource=self;
+    
+    //Set up Twitter data
+    textTweetArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"]objectForKey:@"TWITTER_TEXT"]];
+    nameTweetArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_USER_NAME"]];
+    tweetIconArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_USER_ICON"]];
+    dateArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_POST_DATE"]];
+    NSLog(@"%@",tweetIconArray);
+    [mytableview reloadData];
+    
+    //Call Twitter and Facebook "Get Methods"
+    //[self getFaceBookTimeLine];
     //[self getTwitterTimeline];
-    [self getFaceBookTimeLine];
-    [self getTwitterTimeline];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -43,9 +54,9 @@
     return textTweetArray.count;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    UITableViewCell *cell=[tableView dequeueReusableCellWithIdentifier:@"Cell"];
-    UILabel*label=(UILabel*)[cell viewWithTag:94];
-    label.text=[NSString stringWithFormat:@"%@",textTweetArray[indexPath.row]];
+    UITableViewCell *cell=[mytableview dequeueReusableCellWithIdentifier:@"Cell"];
+    UITextView*textView=(UITextView*)[cell viewWithTag:TIME_LANE_TABLEVIEW_VIEWTAG];
+    textView.text=[NSString stringWithFormat:@"%@",textTweetArray[indexPath.row]];
     return cell;
 }
 #pragma mark - Button methods
@@ -137,34 +148,57 @@
             NSArray *accounts = [accountStore accountsWithAccountType:accountType];
             if (accounts != nil && [accounts count] != 0) {
                 ACAccount *twAccount = accounts[0];
+                
                 NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/home_timeline.json"];
                 NSDictionary *parametersDic=@{@"include_entities": @"1",@"count": @"200"};//count min:20 max:200
                 SLRequest *request = [SLRequest requestForServiceType:SLServiceTypeTwitter requestMethod:SLRequestMethodGET URL:url parameters:parametersDic];
                 request.account = twAccount;
+                
                 [request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
                     if (urlResponse){
                         NSError *jsonError;
                         NSLog(@"Completion of receiving Twitter timeline data. Byte=%lu byte.",(unsigned long)responseData.length);
                         //TODO:fix options
                         NSArray *timeline = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableLeaves error:&jsonError];
+                        NSLog(@"%@",timeline[0]);//test!
                         if(timeline){
-                            for (NSDictionary *tweet in timeline) {
-                                [textTweetArray addObject:[tweet valueForKey:@"text"]];
-                                NSDictionary *user = tweet[@"user"];
-                                [nameTweetArray addObject:user[@"screen_name"]];
-                                [tweetIconArray addObject:user[@"profile_image_url"]];
-                                //TwiietrDate→NSDate Convert
-                                NSDateFormatter* inFormat = [[NSDateFormatter alloc] init];
-                                NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
-                                [inFormat setLocale:locale];
-                                [inFormat setDateFormat:@"EEE MMM dd HH:mm:ss Z yyyy"];
-                                NSString*original_Twitter_Date=[NSString stringWithFormat:@"%@",tweet[@"created_at"]];
-                                NSDate *date =[inFormat dateFromString:original_Twitter_Date];
-                                [dateArray addObject:date];
-                            }
-                            for (int i=0; i<textTweetArray.count; i++) {
-                                NSLog(@"\n number==%d \n text==%@ \n user-screen_name==%@ \n user-profile_image_url==%@ \n created_at=%@  \n\n\n\n",i,textTweetArray[i],nameTweetArray[i],tweetIconArray[i],dateArray[i]);
-                            }
+                            dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
+                            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
+                                
+                                textTweetArray=[[NSMutableArray alloc]init];
+                                nameTweetArray=[[NSMutableArray alloc]init];
+                                tweetIconArray=[[NSMutableArray alloc]init];
+                                dateArray=[[NSMutableArray alloc]init];
+                                
+                                for (NSDictionary *tweet in timeline) {
+                                    
+                                    [textTweetArray addObject:[tweet valueForKey:@"text"]];
+                                    
+                                    NSDictionary *user = tweet[@"user"];
+                                    [nameTweetArray addObject:user[@"screen_name"]];
+                                    [tweetIconArray addObject:user[@"profile_image_url"]];
+                                    
+                                    //TwiietrDate→NSDate Convert
+                                    NSDateFormatter* inFormat = [[NSDateFormatter alloc] init];
+                                    NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+                                    [inFormat setLocale:locale];
+                                    [inFormat setDateFormat:@"EEE MMM dd HH:mm:ss Z yyyy"];
+                                    NSString*original_Twitter_Date=[NSString stringWithFormat:@"%@",tweet[@"created_at"]];
+                                    NSDate *date =[inFormat dateFromString:original_Twitter_Date];
+                                    [dateArray addObject:date];
+                                }
+                                dispatch_semaphore_signal(seamphone);
+                            });
+                            dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+                            NSLog(@"c");
+                            [mytableview reloadData];
+                            
+                            twitterDataDic=[[NSDictionary alloc]initWithObjectsAndKeys:textTweetArray,@"TWITTER_TEXT",nameTweetArray,@"TWITTER_USER_NAME",tweetIconArray,@"TWITTER_USER_ICON",dateArray,@"TWITTER_POST_DATE", nil];
+                            [defaults setObject:twitterDataDic forKey:@"TWITTER_TIMELINE_DATA"];
+                            [defaults synchronize];
+                            NSLog(@"%@",[defaults objectForKey:@"TWITTER_TIMELINE_DATA"]);
+                            NSLog(@"========================COMPLETE========================");
+                        
                         }else{
                             NSLog(@"error: %@",jsonError);
                         }
@@ -177,6 +211,13 @@
             [self getTwitterTimeLineErrorAlert:accountsError];
         }
     }];
+}
+-(void)getTwitterProfileImage{
+    NSMutableDictionary*userImageDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"USER_PROFILE-IMAGE_URL_AND_DATA"]];
+    if ([userImageDic isEqual:[NSNull null]]) {
+    }else{
+        
+    }
 }
 -(void)getTwitterTimeLineErrorAlert:(NSError*)error{
     if (error) {
@@ -203,5 +244,16 @@
             
     }
 }
-
+/*
+ dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+ dispatch_async(queue, ^{
+ 
+ });
+ 
+ dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
+ dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
+ dispatch_semaphore_signal(seamphone);
+ });
+ dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+ */
 @end
