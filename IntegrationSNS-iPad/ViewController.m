@@ -44,7 +44,7 @@
 
     //Call Twitter and Facebook "Get Methods"
     //[self getFaceBookTimeLine];
-    //[self getTwitterTimeline];
+    [self getTwitterTimeline];
     //[self getTwitterProfileImage];
     //[mytableview reloadData];
 }
@@ -202,15 +202,16 @@
                                 dispatch_semaphore_signal(seamphone);
                             });
                             dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
-                            NSLog(@"c");
-                            [mytableview reloadData];
                             
                             twitterDataDic=[[NSDictionary alloc]initWithObjectsAndKeys:textTweetArray,@"TWITTER_TEXT",nameTweetArray,@"TWITTER_USER_NAME",tweetIconArray,@"TWITTER_USER_ICON",dateArray,@"TWITTER_POST_DATE", nil];
                             [defaults setObject:twitterDataDic forKey:@"TWITTER_TIMELINE_DATA"];
                             [defaults synchronize];
                             NSLog(@"%@",[defaults objectForKey:@"TWITTER_TIMELINE_DATA"]);
                             NSLog(@"========================COMPLETE========================");
-                        
+                            [self getTwitterProfileImage];
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                               [mytableview reloadData];
+                            });
                         }else{
                             NSLog(@"error: %@",jsonError);
                         }
