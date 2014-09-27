@@ -7,7 +7,9 @@
 //
 
 #import "ViewController.h"
-#define TIME_LANE_TABLEVIEW_VIEWTAG 1
+#define TIME_LANE_TABLEVIEW_TEXTVIEW_VIEWTAG 1
+#define TIME_LINE_TABLEVIEW_IMAGEVIEW_VIEWTAG 2
+#define TIME_LINE_TABLEVIEW_LABEL_VIEWTAG 3
 
 @interface ViewController (){
     NSMutableArray *textTweetArray;
@@ -17,6 +19,7 @@
     IBOutlet UITableView*mytableview;
     NSUserDefaults*defaults;
     NSDictionary*twitterDataDic;
+    NSMutableDictionary*imageDictionary;
 }
 
 @end
@@ -28,21 +31,22 @@
     //Set up NSUserDefaults
     defaults=[NSUserDefaults standardUserDefaults];
     
-    //Set up delegate and dataSource
-    mytableview.delegate=self;
-    mytableview.dataSource=self;
-    
     //Set up Twitter data
     textTweetArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"]objectForKey:@"TWITTER_TEXT"]];
     nameTweetArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_USER_NAME"]];
     tweetIconArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_USER_ICON"]];
     dateArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_POST_DATE"]];
-    NSLog(@"%@",tweetIconArray);
-    [mytableview reloadData];
+    [self convert_NSData_to_UIImage];
     
+    //Set up delegate and dataSource
+    mytableview.delegate=self;
+    mytableview.dataSource=self;
+
     //Call Twitter and Facebook "Get Methods"
     //[self getFaceBookTimeLine];
     //[self getTwitterTimeline];
+    //[self getTwitterProfileImage];
+    //[mytableview reloadData];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -54,9 +58,17 @@
     return textTweetArray.count;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    UITableViewCell *cell=[mytableview dequeueReusableCellWithIdentifier:@"Cell"];
-    UITextView*textView=(UITextView*)[cell viewWithTag:TIME_LANE_TABLEVIEW_VIEWTAG];
+    UITableViewCell *cell=[mytableview dequeueReusableCellWithIdentifier:@"Cell_type=TWITTER"];
+    
+    UITextView*textView=(UITextView*)[cell viewWithTag:TIME_LANE_TABLEVIEW_TEXTVIEW_VIEWTAG];
     textView.text=[NSString stringWithFormat:@"%@",textTweetArray[indexPath.row]];
+    
+    UIImageView*imageView=(UIImageView*)[cell viewWithTag:TIME_LINE_TABLEVIEW_IMAGEVIEW_VIEWTAG];
+    imageView.image=[imageDictionary objectForKey:tweetIconArray[indexPath.row]];
+    
+    UILabel*label=(UILabel*)[cell viewWithTag:TIME_LINE_TABLEVIEW_LABEL_VIEWTAG];
+    label.text=[NSString stringWithFormat:@"%@",dateArray[indexPath.row]];
+    
     return cell;
 }
 #pragma mark - Button methods
@@ -214,10 +226,30 @@
 }
 -(void)getTwitterProfileImage{
     NSMutableDictionary*userImageDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"USER_PROFILE-IMAGE_URL_AND_DATA"]];
-    if ([userImageDic isEqual:[NSNull null]]) {
-    }else{
-        
+    tweetIconArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_USER_ICON"]];
+    
+    for (NSString*imageURL in tweetIconArray) {
+        if ([userImageDic objectForKey:imageURL]==nil) {
+            NSData*imageData=[NSData dataWithContentsOfURL:[NSURL URLWithString:imageURL]];
+            NSLog(@"Get image data. Data size is %ld",imageData.length);
+            [userImageDic setObject:imageData forKey:imageURL];
+        }
     }
+    [defaults setObject:userImageDic forKey:@"USER_PROFILE-IMAGE_URL_AND_DATA"];
+    
+    [self convert_NSData_to_UIImage];
+}
+-(void)convert_NSData_to_UIImage{
+    NSMutableDictionary*userImageDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"USER_PROFILE-IMAGE_URL_AND_DATA"]];
+    NSArray*userImageDic_All_Keys=[userImageDic allKeys];
+    
+    imageDictionary=[[NSMutableDictionary alloc]init];
+    
+    for (NSString*key in userImageDic_All_Keys) {
+        UIImage*image=[[UIImage alloc]initWithData:[userImageDic objectForKey:key]];
+        [imageDictionary setObject:image forKey:key];
+    }
+    
 }
 -(void)getTwitterTimeLineErrorAlert:(NSError*)error{
     if (error) {
