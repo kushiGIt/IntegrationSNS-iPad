@@ -250,6 +250,11 @@
                                     [inFormat setDateFormat:@"EEE MMM dd HH:mm:ss Z yyyy"];
                                     NSString*original_Twitter_Date=[NSString stringWithFormat:@"%@",tweet[@"created_at"]];
                                     NSDate *date =[inFormat dateFromString:original_Twitter_Date];
+                                    
+                                    NSDateComponents *comps = [[NSDateComponents alloc]init];
+                                    NSCalendar *calendar = [NSCalendar currentCalendar];
+                                    comps.hour=9;
+                                    date=[calendar dateByAddingComponents:comps toDate:date options:0];
                                     [dateArray addObject:date];
                                 }
                                 
