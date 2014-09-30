@@ -16,9 +16,16 @@
 		773AB0F819CF24BC009B46BA /* IntegrationSNS_iPadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 773AB0F719CF24BC009B46BA /* IntegrationSNS_iPadTests.m */; };
 		773AB10419CF251D009B46BA /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 773AB10319CF251D009B46BA /* Accounts.framework */; };
 		773AB10619CF2525009B46BA /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 773AB10519CF2525009B46BA /* Social.framework */; };
-		773AB10819CF253C009B46BA /* FacebookSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 773AB10719CF253C009B46BA /* FacebookSDK.framework */; };
 		77F2521719CF31C100DC9DEF /* MODropAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F2521419CF31C100DC9DEF /* MODropAlertView.m */; };
 		77F2521819CF31C100DC9DEF /* UIImage+ImageEffects.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F2521619CF31C100DC9DEF /* UIImage+ImageEffects.m */; };
+		77F4E6FF19D6D31300B5B61D /* NZAlertViewColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F4E6F719D6D31300B5B61D /* NZAlertViewColor.m */; };
+		77F4E70019D6D31300B5B61D /* NZAlertView-Icons.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 77F4E6F819D6D31300B5B61D /* NZAlertView-Icons.bundle */; };
+		77F4E70119D6D31300B5B61D /* NZAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F4E6FA19D6D31300B5B61D /* NZAlertView.m */; };
+		77F4E70219D6D31300B5B61D /* NZAlertView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 77F4E6FE19D6D31300B5B61D /* NZAlertView.xib */; };
+		77F4E70B19D6D40E00B5B61D /* UIImage+Blur.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F4E70519D6D40E00B5B61D /* UIImage+Blur.m */; };
+		77F4E70C19D6D40E00B5B61D /* UIImage+ImageWithColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F4E70719D6D40E00B5B61D /* UIImage+ImageWithColor.m */; };
+		77F4E70D19D6D40E00B5B61D /* UIImage+Screenshot.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F4E70919D6D40E00B5B61D /* UIImage+Screenshot.m */; };
+		77F4E71119D6FDFA00B5B61D /* mark.png in Resources */ = {isa = PBXBuildFile; fileRef = 77F4E71019D6FDFA00B5B61D /* mark.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,12 +54,26 @@
 		773AB0F719CF24BC009B46BA /* IntegrationSNS_iPadTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IntegrationSNS_iPadTests.m; sourceTree = "<group>"; };
 		773AB10319CF251D009B46BA /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
 		773AB10519CF2525009B46BA /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
-		773AB10719CF253C009B46BA /* FacebookSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FacebookSDK.framework; path = ../../Documents/FacebookSDK/FacebookSDK.framework; sourceTree = "<group>"; };
 		77D4D13A19D0612300A5BA35 /* IntegrationSNS-iPad.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "IntegrationSNS-iPad.entitlements"; sourceTree = "<group>"; };
 		77F2521319CF31C100DC9DEF /* MODropAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MODropAlertView.h; sourceTree = "<group>"; };
 		77F2521419CF31C100DC9DEF /* MODropAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MODropAlertView.m; sourceTree = "<group>"; };
 		77F2521519CF31C100DC9DEF /* UIImage+ImageEffects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ImageEffects.h"; sourceTree = "<group>"; };
 		77F2521619CF31C100DC9DEF /* UIImage+ImageEffects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ImageEffects.m"; sourceTree = "<group>"; };
+		77F4E6F619D6D31300B5B61D /* NZAlertViewColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NZAlertViewColor.h; sourceTree = "<group>"; };
+		77F4E6F719D6D31300B5B61D /* NZAlertViewColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NZAlertViewColor.m; sourceTree = "<group>"; };
+		77F4E6F819D6D31300B5B61D /* NZAlertView-Icons.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = "NZAlertView-Icons.bundle"; sourceTree = "<group>"; };
+		77F4E6F919D6D31300B5B61D /* NZAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NZAlertView.h; sourceTree = "<group>"; };
+		77F4E6FA19D6D31300B5B61D /* NZAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NZAlertView.m; sourceTree = "<group>"; };
+		77F4E6FC19D6D31300B5B61D /* NZAlertViewDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NZAlertViewDelegate.h; sourceTree = "<group>"; };
+		77F4E6FE19D6D31300B5B61D /* NZAlertView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = NZAlertView.xib; sourceTree = "<group>"; };
+		77F4E70419D6D40E00B5B61D /* UIImage+Blur.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Blur.h"; sourceTree = "<group>"; };
+		77F4E70519D6D40E00B5B61D /* UIImage+Blur.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Blur.m"; sourceTree = "<group>"; };
+		77F4E70619D6D40E00B5B61D /* UIImage+ImageWithColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ImageWithColor.h"; sourceTree = "<group>"; };
+		77F4E70719D6D40E00B5B61D /* UIImage+ImageWithColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ImageWithColor.m"; sourceTree = "<group>"; };
+		77F4E70819D6D40E00B5B61D /* UIImage+Screenshot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+Screenshot.h"; sourceTree = "<group>"; };
+		77F4E70919D6D40E00B5B61D /* UIImage+Screenshot.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+Screenshot.m"; sourceTree = "<group>"; };
+		77F4E70A19D6D40E00B5B61D /* UIImage-Helpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage-Helpers.h"; sourceTree = "<group>"; };
+		77F4E71019D6FDFA00B5B61D /* mark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mark.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,7 +81,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				773AB10819CF253C009B46BA /* FacebookSDK.framework in Frameworks */,
 				773AB10619CF2525009B46BA /* Social.framework in Frameworks */,
 				773AB10419CF251D009B46BA /* Accounts.framework in Frameworks */,
 			);
@@ -79,9 +99,7 @@
 		773AB0CF19CF24BC009B46BA = {
 			isa = PBXGroup;
 			children = (
-				773AB10719CF253C009B46BA /* FacebookSDK.framework */,
-				773AB10519CF2525009B46BA /* Social.framework */,
-				773AB10319CF251D009B46BA /* Accounts.framework */,
+				77F4E71019D6FDFA00B5B61D /* mark.png */,
 				773AB0DA19CF24BC009B46BA /* IntegrationSNS-iPad */,
 				773AB0F419CF24BC009B46BA /* IntegrationSNS-iPadTests */,
 				773AB0D919CF24BC009B46BA /* Products */,
@@ -105,6 +123,7 @@
 				773AB0E019CF24BC009B46BA /* AppDelegate.m */,
 				773AB0E219CF24BC009B46BA /* ViewController.h */,
 				773AB0E319CF24BC009B46BA /* ViewController.m */,
+				77F4E6F419D6D31300B5B61D /* NZAlertView */,
 				77F2521219CF31C100DC9DEF /* MODropAlert */,
 				773AB0E519CF24BC009B46BA /* Main.storyboard */,
 				773AB0E819CF24BC009B46BA /* Images.xcassets */,
@@ -135,6 +154,8 @@
 		773AB0F519CF24BC009B46BA /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				773AB10519CF2525009B46BA /* Social.framework */,
+				773AB10319CF251D009B46BA /* Accounts.framework */,
 				773AB0F619CF24BC009B46BA /* Info.plist */,
 			);
 			name = "Supporting Files";
@@ -149,6 +170,61 @@
 				77F2521619CF31C100DC9DEF /* UIImage+ImageEffects.m */,
 			);
 			path = MODropAlert;
+			sourceTree = "<group>";
+		};
+		77F4E6F419D6D31300B5B61D /* NZAlertView */ = {
+			isa = PBXGroup;
+			children = (
+				77F4E70319D6D40E00B5B61D /* UIImage-Helpers */,
+				77F4E6F519D6D31300B5B61D /* Helpers */,
+				77F4E6F819D6D31300B5B61D /* NZAlertView-Icons.bundle */,
+				77F4E6F919D6D31300B5B61D /* NZAlertView.h */,
+				77F4E6FA19D6D31300B5B61D /* NZAlertView.m */,
+				77F4E6FB19D6D31300B5B61D /* Protocols */,
+				77F4E6FD19D6D31300B5B61D /* Views */,
+			);
+			name = NZAlertView;
+			path = ../NZAlertView;
+			sourceTree = "<group>";
+		};
+		77F4E6F519D6D31300B5B61D /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				77F4E6F619D6D31300B5B61D /* NZAlertViewColor.h */,
+				77F4E6F719D6D31300B5B61D /* NZAlertViewColor.m */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+		77F4E6FB19D6D31300B5B61D /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				77F4E6FC19D6D31300B5B61D /* NZAlertViewDelegate.h */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		77F4E6FD19D6D31300B5B61D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				77F4E6FE19D6D31300B5B61D /* NZAlertView.xib */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		77F4E70319D6D40E00B5B61D /* UIImage-Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				77F4E70419D6D40E00B5B61D /* UIImage+Blur.h */,
+				77F4E70519D6D40E00B5B61D /* UIImage+Blur.m */,
+				77F4E70619D6D40E00B5B61D /* UIImage+ImageWithColor.h */,
+				77F4E70719D6D40E00B5B61D /* UIImage+ImageWithColor.m */,
+				77F4E70819D6D40E00B5B61D /* UIImage+Screenshot.h */,
+				77F4E70919D6D40E00B5B61D /* UIImage+Screenshot.m */,
+				77F4E70A19D6D40E00B5B61D /* UIImage-Helpers.h */,
+			);
+			name = "UIImage-Helpers";
+			path = "../UIImage-Helpers";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -237,9 +313,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77F4E70019D6D31300B5B61D /* NZAlertView-Icons.bundle in Resources */,
+				77F4E71119D6FDFA00B5B61D /* mark.png in Resources */,
 				773AB0E719CF24BC009B46BA /* Main.storyboard in Resources */,
 				773AB0EC19CF24BC009B46BA /* LaunchScreen.xib in Resources */,
 				773AB0E919CF24BC009B46BA /* Images.xcassets in Resources */,
+				77F4E70219D6D31300B5B61D /* NZAlertView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -258,10 +337,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				77F2521719CF31C100DC9DEF /* MODropAlertView.m in Sources */,
+				77F4E70C19D6D40E00B5B61D /* UIImage+ImageWithColor.m in Sources */,
 				77F2521819CF31C100DC9DEF /* UIImage+ImageEffects.m in Sources */,
+				77F4E70B19D6D40E00B5B61D /* UIImage+Blur.m in Sources */,
 				773AB0E419CF24BC009B46BA /* ViewController.m in Sources */,
+				77F4E70D19D6D40E00B5B61D /* UIImage+Screenshot.m in Sources */,
+				77F4E70119D6D31300B5B61D /* NZAlertView.m in Sources */,
 				773AB0E119CF24BC009B46BA /* AppDelegate.m in Sources */,
 				773AB0DE19CF24BC009B46BA /* main.m in Sources */,
+				77F4E6FF19D6D31300B5B61D /* NZAlertViewColor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

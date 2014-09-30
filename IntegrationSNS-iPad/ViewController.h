@@ -9,8 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <Accounts/Accounts.h>
 #import <Social/Social.h>
-#import <FacebookSDK/FacebookSDK.h>
 #import "MODropAlertView.h"
+#import "NZAlertView.h"
 
 @interface ViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate,MODropAlertViewDelegate>{
     
