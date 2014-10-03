@@ -12,10 +12,6 @@
 #define TIME_LINE_TABLEVIEW_LABEL_VIEWTAG 3
 
 @interface ViewController (){
-    NSMutableArray *textTweetArray;
-    NSMutableArray *nameTweetArray;
-    NSMutableArray *tweetIconArray;
-    NSMutableArray *dateArray;
     NSString*since_id;
     NSString*max_id;
     IBOutlet UITableView*mytableview;
@@ -32,7 +28,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 //    NSLog(@"%lu",(unsigned long)[self getTwitterTimeLineNewly].count);
-    NSLog(@"%@",[self getTwitterTimeLineNewly]);
+    NSLog(@"a=%@",[self getTwitterTimeLineNewly]);
+    
     
 }
 - (void)didReceiveMemoryWarning {
@@ -40,21 +37,21 @@
     // Dispose of any resources that can be recreated.
 }
 #pragma mark - TableView methods
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+/*- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     return 1;
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return textTweetArray.count;
+    return textArray.count;
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     UITableViewCell *cell=[mytableview dequeueReusableCellWithIdentifier:@"Cell_type=TWITTER"];
     
     UITextView*textView=(UITextView*)[cell viewWithTag:TIME_LANE_TABLEVIEW_TEXTVIEW_VIEWTAG];
-    textView.text=[NSString stringWithFormat:@"%@",textTweetArray[indexPath.row]];
+    textView.text=[NSString stringWithFormat:@"%@",textArray[indexPath.row]];
     
     UIImageView*imageView=(UIImageView*)[cell viewWithTag:TIME_LINE_TABLEVIEW_IMAGEVIEW_VIEWTAG];
-    imageView.image=[imageDictionary objectForKey:tweetIconArray[indexPath.row]];
+    imageView.image=[imageDictionary objectForKey:iconArray[indexPath.row]];
     
     UILabel*label=(UILabel*)[cell viewWithTag:TIME_LINE_TABLEVIEW_LABEL_VIEWTAG];
     label.text=[NSString stringWithFormat:@"%@",dateArray[indexPath.row]];
@@ -62,9 +59,14 @@
     return cell;
 }
 -(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath{
-    if (indexPath.row >=textTweetArray.count) {
+    if (indexPath.row >=textArray.count) {
         NSLog(@"Need reload (use max_id)");
     }
+}*/
+#pragma mark - get timeline
+-(NSMutableArray*)getTwiterAndFacebookTimeLine{
+    
+    return  nil;
 }
 #pragma mark Get facebook timeline
 -(void)getFaceBookTimeLine{
@@ -140,16 +142,15 @@
 }
 
 #pragma mark - Get Twitter timeline
-#pragma mark set Request and alert
--(NSMutableDictionary*)getTwitterTimeLineNewly{
+-(NSDictionary*)getTwitterTimeLineNewly{
     __block NSMutableArray*responsedArray=[[NSMutableArray alloc]initWithArray:[self getTwitterTimeLineNewlyFromServer]];
-    __block NSMutableDictionary*timelineDic;
+    __block NSDictionary*timelineDic;
     __block MODropAlertView *alert;
     dispatch_queue_t mainQueue = dispatch_get_main_queue();
     
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
         if (responsedArray[0]==[NSNull null]) {
             
             dispatch_async(mainQueue, ^{
@@ -180,18 +181,58 @@
                 
             });
             
-            timelineDic=[[NSMutableDictionary alloc]init];
+            timelineDic=[NSDictionary dictionary];
             dispatch_semaphore_signal(seamphone);
             
         }else{
             
-            dispatch_async(mainQueue, ^{
+            NSMutableArray *textArray=[[NSMutableArray alloc]init];
+            NSMutableArray *nameArray=[[NSMutableArray alloc]init];
+            NSMutableArray *iconArray=[[NSMutableArray alloc]init];
+            NSMutableArray *dateArray=[[NSMutableArray alloc]init];
+
+            
+            dispatch_semaphore_t pigeonholeObjectWait=dispatch_semaphore_create(0);
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+                
+                for (NSDictionary *tweet in responsedArray) {
+                    
+                    [textArray addObject:[tweet objectForKey:@"text"]];
+                    
+                    NSDictionary *user = tweet[@"user"];
+                    [nameArray addObject:user[@"screen_name"]];
+                    [iconArray addObject:user[@"profile_image_url"]];
+                    
+                    //TwiietrDate→NSDate Convert
+                    NSDateFormatter* inFormat = [[NSDateFormatter alloc] init];
+                    NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
+                    [inFormat setLocale:locale];
+                    [inFormat setDateFormat:@"EEE MMM dd HH:mm:ss Z yyyy"];
+                    NSString*original_Twitter_Date=[NSString stringWithFormat:@"%@",tweet[@"created_at"]];
+                    NSDate *date =[inFormat dateFromString:original_Twitter_Date];
+                    
+                    NSDateComponents *comps = [[NSDateComponents alloc]init];
+                    NSCalendar *calendar = [NSCalendar currentCalendar];
+                    comps.hour=9;
+                    date=[calendar dateByAddingComponents:comps toDate:date options:0];
+                    [dateArray addObject:date];
+                
+                }
                 
                 
-                
+                dispatch_semaphore_signal(pigeonholeObjectWait);
+            
             });
+            
+            dispatch_semaphore_wait(pigeonholeObjectWait, DISPATCH_TIME_FOREVER);
+            
+            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:textArray,@"TWITTER_TEXT",nameArray,@"TWITTER_USER_NAME",iconArray,@"TWITTER_USER_ICON",dateArray,@"TWITTER_POST_DATE", nil];
+            
+            dispatch_semaphore_signal(seamphone);
+
         }
     });
+    
     dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
     
     return timelineDic;
@@ -204,7 +245,7 @@
     
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
         
         [accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted,NSError *accountsError){
             if (granted==YES) {
@@ -295,11 +336,11 @@
 
 }
 #pragma mark get user orofile image and convert
--(void)getTwitterProfileImage{
+/*-(void)getTwitterProfileImage{
     NSMutableDictionary*userImageDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"USER_PROFILE-IMAGE_URL_AND_DATA"]];
-    tweetIconArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_USER_ICON"]];
+    iconArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_USER_ICON"]];
     
-    for (NSString*imageURL in tweetIconArray) {
+    for (NSString*imageURL in iconArray) {
         if ([userImageDic objectForKey:imageURL]==nil) {
             NSData*imageData=[NSData dataWithContentsOfURL:[NSURL URLWithString:imageURL]];
             NSLog(@"Get image data. Data size is %ld",imageData.length);
@@ -322,7 +363,7 @@
         [imageDictionary setObject:image forKey:key];
     }
     
-}
+}*/
 
 #pragma mark - UIAlertViewDelegate
 -(void)alertViewPressButton:(MODropAlertView *)alertView buttonType:(DropAlertButtonType)buttonType{
