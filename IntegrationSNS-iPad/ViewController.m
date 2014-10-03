@@ -31,65 +31,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    /*NZAlertView *alert = [[NZAlertView alloc] initWithStyle:NZAlertStyleSuccess
-                                                      title:@"Alert View"
-                                                    message:@"This is an alert example."
-                                                   delegate:nil];
+//    NSLog(@"%lu",(unsigned long)[self getTwitterTimeLineNewly].count);
+    NSLog(@"%@",[self getTwitterTimeLineNewly]);
     
-    [alert setTextAlignment:NSTextAlignmentCenter];
-    [alert show];*/
-    
-    //Set up create "Reload view"
-    _refreshControl = [[UIRefreshControl alloc] init];
-    [_refreshControl addTarget:self action:@selector(refresh) forControlEvents:UIControlEventValueChanged];
-    [mytableview addSubview:_refreshControl];
-    
-    //Set up NSUserDefaults
-    defaults=[NSUserDefaults standardUserDefaults];
-    
-    //Set up Twitter data
-    [self setupTewitterData];
-    [self convert_NSData_to_UIImage];
-    
-    //Set up delegate and dataSource
-    mytableview.delegate=self;
-    mytableview.dataSource=self;
-
-    //Call Twitter and Facebook "Get Methods"
-    [self getTwitterTimeLineNewly];
-    //[self twitterDataRemove];
-    
-}
--(void)setupTewitterData{
-    textTweetArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"]objectForKey:@"TWITTER_TEXT"]];
-    nameTweetArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_USER_NAME"]];
-    tweetIconArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_USER_ICON"]];
-    dateArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_POST_DATE"]];
-    since_id=[defaults stringForKey:@"TWITTER_SINCE_ID"];
-    max_id=[defaults stringForKey:@"TWITTER_MAX_ID"];
-    NSLog(@"since_id = %@",since_id);
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-}
-#pragma mark - Refresh Controller
-- (void)refresh
-{
-    NSLog(@"refresh");
-    dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
-        dispatch_semaphore_signal(seamphone);
-        [self setupTewitterData];
-        [self getTwitterTimeLineNewly];
-    });
-    dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
-    [self endRefresh];
-}
-
-- (void)endRefresh
-{
-    [_refreshControl endRefreshing];
 }
 #pragma mark - TableView methods
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -118,12 +66,6 @@
         NSLog(@"Need reload (use max_id)");
     }
 }
-#pragma mark - Button methods
-#pragma mark BackBt
--(IBAction)backToTop{
-    [self dismissViewControllerAnimated:YES completion:nil];
-}
-#pragma mark - Get timeline
 #pragma mark Get facebook timeline
 -(void)getFaceBookTimeLine{
     ACAccountStore *accountStore = [[ACAccountStore alloc] init];
@@ -196,190 +138,161 @@
     alert.delegate=self;
     [alert show];
 }
+
 #pragma mark - Get Twitter timeline
 #pragma mark set Request and alert
--(void)getTwitterTimeLineNewly{
+-(NSMutableDictionary*)getTwitterTimeLineNewly{
+    __block NSMutableArray*responsedArray=[[NSMutableArray alloc]initWithArray:[self getTwitterTimeLineNewlyFromServer]];
+    __block NSMutableDictionary*timelineDic;
+    __block MODropAlertView *alert;
+    dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    
+    
+    dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
+        if (responsedArray[0]==[NSNull null]) {
+            
+            dispatch_async(mainQueue, ^{
+                
+                if ([responsedArray[1]isEqualToString:@"RESPONSED_DATA_IS_NULL"]) {
+                    
+                    NSLog(@"Not any get twitter data");
+                    
+                }else if ([responsedArray[1]isEqualToString:@"NOT_ANY_RESPONSED_DATA"]){
+                    
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"サーバからの応答がありません。" okButtonTitle:@"OK"];
+                    [alert show];
+                    
+                }else if ([responsedArray[1]isEqualToString:@"ACCOUNT_ERROR"]){
+                    
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"Twitterアカウント" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
+                    alert.delegate=self;
+                    [alert show];
+                    
+                }else{
+                    
+                    NSLog(@"Unknown error");
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"予期しないエラーです。" okButtonTitle:@"OK"];
+                    [alert show];
+                    
+                }
+
+                
+            });
+            
+            timelineDic=[[NSMutableDictionary alloc]init];
+            dispatch_semaphore_signal(seamphone);
+            
+        }else{
+            
+            dispatch_async(mainQueue, ^{
+                
+                
+                
+            });
+        }
+    });
+    dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+    
+    return timelineDic;
+}
+-(NSMutableArray*)getTwitterTimeLineNewlyFromServer{
+    
     ACAccountStore *accountStore = [[ACAccountStore alloc] init];
     ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
+    __block NSMutableArray*timeLineArray;
     
-    [accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted, NSError *accountsError) {
-        if(granted==YES){
-            NSArray *accounts = [accountStore accountsWithAccountType:accountType];
-            if (accounts != nil && [accounts count] != 0) {
-                ACAccount *twAccount = accounts[0];
+    
+    dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
+        
+        [accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted,NSError *accountsError){
+            if (granted==YES) {
                 
-                NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/home_timeline.json"];
+                NSArray*accounts=[accountStore accountsWithAccountType:accountType];
                 
-                NSDictionary *parametersDic=[[NSDictionary alloc]init];
-                if ([defaults stringForKey:@"TWITTER_SINCE_ID"].length==0) {
-                    parametersDic=@{@"include_entities": @"1",@"count": @"200"};
-                    NSLog(@"Parameter=%@",parametersDic);
-                }else{
-                    parametersDic=@{@"include_entities": @"1",@"count": @"200",@"since_id": since_id};
-                    NSLog(@"Parameter=%@",parametersDic);
-                }
-                
-                SLRequest *request = [SLRequest requestForServiceType:SLServiceTypeTwitter requestMethod:SLRequestMethodGET URL:url parameters:parametersDic];
-                request.account = twAccount;
-                
-                [request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
-                    if (urlResponse){
-                        NSError *jsonError;
-                        NSLog(@"Completion of receiving Twitter timeline data. Byte=%lu byte.",(unsigned long)responseData.length);
+                if (accounts!=nil&&accounts.count!=0) {
+                    
+                    ACAccount *twAccount = accounts[0];
+                    
+                    //set url
+                    NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/home_timeline.json"];
+                    
+                    //set parameters
+                    NSDictionary *parametersDic=[[NSDictionary alloc]init];
+                    
+                    if ([defaults stringForKey:@"TWITTER_SINCE_ID"].length==0) {
                         
-                        NSArray *timeline = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableLeaves error:&jsonError];
+                        parametersDic=@{@"include_entities": @"1",@"count": @"200"};
+                        NSLog(@"Parameter=%@",parametersDic);
                         
-//                        [self getTwitterMAX_id:[[timeline valueForKey:@"id_str"]lastObject]];
+                    }else{
                         
-                        if(timeline){
-                            dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
-                            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
-                                
-                                for (NSDictionary *tweet in timeline) {
-                                    
-                                    [textTweetArray addObject:[tweet valueForKey:@"text"]];
-                                    
-                                    NSDictionary *user = tweet[@"user"];
-                                    [nameTweetArray addObject:user[@"screen_name"]];
-                                    [tweetIconArray addObject:user[@"profile_image_url"]];
-                                    
-                                    //TwiietrDate→NSDate Convert
-                                    NSDateFormatter* inFormat = [[NSDateFormatter alloc] init];
-                                    NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
-                                    [inFormat setLocale:locale];
-                                    [inFormat setDateFormat:@"EEE MMM dd HH:mm:ss Z yyyy"];
-                                    NSString*original_Twitter_Date=[NSString stringWithFormat:@"%@",tweet[@"created_at"]];
-                                    NSDate *date =[inFormat dateFromString:original_Twitter_Date];
-                                    
-                                    NSDateComponents *comps = [[NSDateComponents alloc]init];
-                                    NSCalendar *calendar = [NSCalendar currentCalendar];
-                                    comps.hour=9;
-                                    date=[calendar dateByAddingComponents:comps toDate:date options:0];
-                                    [dateArray addObject:date];
-                                }
-                                
-                                dispatch_semaphore_signal(seamphone);
-                            });
-                            dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+                        parametersDic=@{@"include_entities": @"1",@"count": @"200",@"since_id": since_id};
+                        NSLog(@"Parameter=%@",parametersDic);
+                        
+                    }
+                    
+                    SLRequest *request = [SLRequest requestForServiceType:SLServiceTypeTwitter requestMethod:SLRequestMethodGET URL:url parameters:parametersDic];
+                    request.account = twAccount;
+                    
+                    [request performRequestWithHandler:^(NSData*responseData,NSHTTPURLResponse*urlResponse,NSError*error){
+                        if (urlResponse) {
+                            NSError *jsonError;
+                            NSLog(@"Completion of receiving Twitter timeline data. Byte=%lu byte.",(unsigned long)responseData.length);
                             
-                            since_id=[[timeline valueForKey:@"id_str"]firstObject];
-                            if (since_id.length==0) {
-                                NSLog(@"Could not get since_id");
-                            }else{
-                                NSLog(@"get since_id = %@",since_id);
-                                [defaults setObject:since_id forKey:@"TWITTER_SINCE_ID"];
-
+                            NSMutableArray*responseArray=[NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableLeaves error:&jsonError];
+                            
+                            if (jsonError) {
+                                
+                                NSLog(@"%s,%@",__func__,jsonError);
+                                
                             }
-                            twitterDataDic=[[NSDictionary alloc]initWithObjectsAndKeys:textTweetArray,@"TWITTER_TEXT",nameTweetArray,@"TWITTER_USER_NAME",tweetIconArray,@"TWITTER_USER_ICON",dateArray,@"TWITTER_POST_DATE", nil];
-                            [defaults setObject:twitterDataDic forKey:@"TWITTER_TIMELINE_DATA"];
-                            [defaults synchronize];
-                            NSLog(@"Complete get Twitter timeline.");
                             
-                            [self getTwitterProfileImage];
-                            
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                                [mytableview reloadData];
-                                NSLog(@"tableview reload data");
-                            });
+                            if (responseArray.count==0) {
+                                
+                                NSLog(@"ResponseData is NULL");
+                                timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"RESPONSED_DATA_IS_NULL", nil];
+                                dispatch_semaphore_signal(seamphone);
+                                
+                            }else{
+                                timeLineArray=[[NSMutableArray alloc]initWithArray:responseArray];
+                                dispatch_semaphore_signal(seamphone);
+                            }
                             
                         }else{
-                            NSLog(@"error: %@",jsonError);
+                            
+                            timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"NOT_ANY_RESPONSED_DATA", nil];
+                            dispatch_semaphore_signal(seamphone);
+                            
                         }
-                    }
-                }];
-                
-            }else{
-                [self getTwitterTimeLineErrorAlert:accountsError];
-            }
-        }else{
-            [self getTwitterTimeLineErrorAlert:accountsError];
-        }
-    }];
-
-}
--(void)getTwitterTimeLineOldly{
-    
-    ACAccountStore *accountStore = [[ACAccountStore alloc] init];
-    ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
-    
-    [accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted, NSError *accountsError) {
-        if(granted==YES){
-            NSArray *accounts = [accountStore accountsWithAccountType:accountType];
-            if (accounts != nil && [accounts count] != 0) {
-                ACAccount *twAccount = accounts[0];
-                
-                NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/home_timeline.json"];
-                NSDictionary *parametersDic=@{@"include_entities": @"1",@"count": @"200",@"max_id": max_id};//count min:20 max:200
-                SLRequest *request = [SLRequest requestForServiceType:SLServiceTypeTwitter requestMethod:SLRequestMethodGET URL:url parameters:parametersDic];
-                request.account = twAccount;
-                [self getTwitterTimeLine:request];
-            }else{
-                [self getTwitterTimeLineErrorAlert:accountsError];
-            }
-        }else{
-            [self getTwitterTimeLineErrorAlert:accountsError];
-        }
-    }];
-}
-#pragma mark get timeline
--(void)getTwitterTimeLine:(SLRequest*)request{
-    
-    [request performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
-        if (urlResponse){
-            NSError *jsonError;
-            NSLog(@"Completion of receiving Twitter timeline data. Byte=%lu byte.",(unsigned long)responseData.length);
-            //TODO:fix options
-            NSArray *timeline = [NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableLeaves error:&jsonError];
-            
-            [self getTwitterSince_id:[[timeline valueForKey:@"id_str"]firstObject]];
-            [self getTwitterMAX_id:[[timeline valueForKey:@"id_str"]lastObject]];
-            
-            if(timeline){
-                dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
-                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
+                        
+                    }];
                     
-                    for (NSDictionary *tweet in timeline) {
-                        
-                        [textTweetArray addObject:[tweet valueForKey:@"text"]];
-                        
-                        NSDictionary *user = tweet[@"user"];
-                        [nameTweetArray addObject:user[@"screen_name"]];
-                        [tweetIconArray addObject:user[@"profile_image_url"]];
-                        
-                        //TwiietrDate→NSDate Convert
-                        NSDateFormatter* inFormat = [[NSDateFormatter alloc] init];
-                        NSLocale *locale = [[NSLocale alloc] initWithLocaleIdentifier:@"en_US"];
-                        [inFormat setLocale:locale];
-                        [inFormat setDateFormat:@"EEE MMM dd HH:mm:ss Z yyyy"];
-                        NSString*original_Twitter_Date=[NSString stringWithFormat:@"%@",tweet[@"created_at"]];
-                        NSDate *date =[inFormat dateFromString:original_Twitter_Date];
-                        [dateArray addObject:date];
-                    }
+                    
+                }else{
+                    
+                    timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"ACCOUNT_ERROR", nil];
                     dispatch_semaphore_signal(seamphone);
-                });
-                dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+                    
+                }
                 
-                twitterDataDic=[[NSDictionary alloc]initWithObjectsAndKeys:textTweetArray,@"TWITTER_TEXT",nameTweetArray,@"TWITTER_USER_NAME",tweetIconArray,@"TWITTER_USER_ICON",dateArray,@"TWITTER_POST_DATE", nil];
-                [defaults setObject:twitterDataDic forKey:@"TWITTER_TIMELINE_DATA"];
-                [defaults synchronize];
-                NSLog(@"Complete get Twitter timeline.");
-                [self getTwitterProfileImage];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [mytableview reloadData];
-                });
             }else{
-                NSLog(@"error: %@",jsonError);
+                
+                timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"ACCOUNT_ERROR", nil];
+                dispatch_semaphore_signal(seamphone);
+                
+                
             }
-        }
-    }];
-}
--(void)getTwitterSince_id:(NSString*)sinceID{
-    NSLog(@"since_id=%@",sinceID);
-    [defaults setObject:sinceID forKey:@"TWITTER_SINCE_ID"];
-}
--(void)getTwitterMAX_id:(NSString*)maxID{
-    NSLog(@"max_id=%@",maxID);
-    [defaults setObject:maxID forKey:@"TWITTER_MAX_ID"];
+            
+        }];
+    
+    });
+    
+    
+    dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+    return timeLineArray;
+
 }
 #pragma mark get user orofile image and convert
 -(void)getTwitterProfileImage{
@@ -410,37 +323,7 @@
     }
     
 }
-#pragma mark remove data
--(void)twitterDataRemove{
-//    [self setupTewitterData];
-//    [textTweetArray removeObjectsInRange:NSMakeRange(200,textTweetArray.count-200)];
-//    [nameTweetArray removeObjectsInRange:NSMakeRange(200,nameTweetArray.count-200)];
-//    [tweetIconArray removeObjectsInRange:NSMakeRange(200,tweetIconArray.count-200)];
-//    [dateArray removeObjectsInRange:NSMakeRange(200,dateArray.count-200)];
-//
-//#ifdef DEBUG
-//    NSLog(@"textTweetArray=%lu",textTweetArray.count);
-//    NSLog(@"nameTweetArray=%lu",nameTweetArray.count);
-//    NSLog(@"tweetIconArray=%lu",tweetIconArray.count);
-//    NSLog(@"dateArray=%lu",dateArray.count);
-//#endif
-//    
-    twitterDataDic=[[NSDictionary alloc]initWithObjectsAndKeys:textTweetArray,@"TWITTER_TEXT",nameTweetArray,@"TWITTER_USER_NAME",tweetIconArray,@"TWITTER_USER_ICON",dateArray,@"TWITTER_POST_DATE", nil];
-    [defaults setObject:twitterDataDic forKey:@"TWITTER_TIMELINE_DATA"];
-    [defaults synchronize];
-    NSLog(@"Complete delete twitter timeline data.");
-}
-#pragma mark show alert
--(void)getTwitterTimeLineErrorAlert:(NSError*)error{
-    if (error) {
-        NSLog(@"%s,%@",__func__,error);
-    }else{
-        NSLog(@"========Twitter account is error========");
-    }
-    MODropAlertView *alert =[[MODropAlertView alloc]initDropAlertWithTitle:@"Twitter Account" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
-    alert.delegate=self;
-    [alert show];
-}
+
 #pragma mark - UIAlertViewDelegate
 -(void)alertViewPressButton:(MODropAlertView *)alertView buttonType:(DropAlertButtonType)buttonType{
     NSLog(@"%s",__func__);
