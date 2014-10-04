@@ -12,7 +12,6 @@
 #define TIME_LINE_TABLEVIEW_LABEL_VIEWTAG 3
 
 @interface ViewController (){
-    NSString*since_id;
     NSString*max_id;
     IBOutlet UITableView*mytableview;
     NSUserDefaults*defaults;
@@ -25,6 +24,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    //Set UserDefaults
+    defaults=[NSUserDefaults standardUserDefaults];
     
     //Cheak Network
     Reachability *reachablity = [Reachability reachabilityForInternetConnection];
@@ -42,12 +43,11 @@
     
     }else{
         
-        NSLog(@"IOS is connected to the Internet.");
-        NSLog(@"%@",[self getTwitterProfileImage:[self getTwitterTimeLineNewly].mutableCopy]);
+        [self getTwitterAndFacebookTimeLineFromNSUserDefaults];
         
     }
     
-    //NSLog(@"%s",[[[self getTwitterTimeLineNewly]objectForKey:@"ERROR"]boolValue] ? "YES":"NO");
+//    NSLog(@"%s",[[[self getTwitterTimeLineNewly]objectForKey:@"ERROR"]boolValue] ? "YES":"NO");
     
     
     
@@ -84,9 +84,25 @@
     }
 }*/
 #pragma mark - get timeline
--(NSMutableArray*)getTwitterAndFacebookTimeLine{
+-(void)getTwitterAndFacebookTimeLine{
+    //[[[self getTwitterTimeLineNewly] objectForKey:@"ERROR"]boolValue]
+    NSDictionary*gotTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getTwitterTimeLineNewly]];
     
-    return  nil;
+    if ([[gotTimeLineDic objectForKey:@"ERROR"]boolValue]==NO) {
+        
+    }else{
+        
+       NSDictionary*gotTwitterUserProfileImage=[[NSDictionary alloc]initWithDictionary:[self getTwitterProfileImage:gotTimeLineDic.mutableCopy].copy];
+    
+    }
+    
+}
+-(void)getTwitterAndFacebookTimeLineFromNSUserDefaults{
+    
+    NSDictionary*twitterTimeLineDic=[[NSDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"TWITTER_TIME-LINE_DATA"]];
+    NSDictionary*twitterUserProfileImage=[[NSDictionary alloc]initWithDictionary:[self getTwitterProfileImage:twitterTimeLineDic.mutableCopy].copy];
+    NSLog(@"%@",twitterTimeLineDic);
+
 }
 #pragma mark Get facebook timeline
 -(void)getFaceBookTimeLine{
@@ -207,11 +223,11 @@
             dispatch_semaphore_signal(seamphone);
             
         }else{
-            
-            NSMutableArray *textArray=[[NSMutableArray alloc]init];
-            NSMutableArray *nameArray=[[NSMutableArray alloc]init];
-            NSMutableArray *iconArray=[[NSMutableArray alloc]init];
-            NSMutableArray *dateArray=[[NSMutableArray alloc]init];
+            timelineDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"TWITTER_TIME-LINE_DATA"]];
+            NSMutableArray *textArray=[[NSMutableArray alloc]initWithArray:[timelineDic objectForKey:@"TWITTER_TEXT"]];
+            NSMutableArray *nameArray=[[NSMutableArray alloc]initWithArray:[timelineDic objectForKey:@"TWITTER_USER_NAME"]];
+            NSMutableArray *iconArray=[[NSMutableArray alloc]initWithArray:[timelineDic objectForKey:@"TWITTER_USER_ICON"]];
+            NSMutableArray *dateArray=[[NSMutableArray alloc]initWithArray:[timelineDic objectForKey:@"TWITTER_POST_DATE"]];
 
             
             dispatch_semaphore_t pigeonholeObjectWait=dispatch_semaphore_create(0);
@@ -248,7 +264,12 @@
             
             dispatch_semaphore_wait(pigeonholeObjectWait, DISPATCH_TIME_FOREVER);
             
+            NSString*since_id=[NSString stringWithFormat:@"%@",[[responsedArray valueForKey:@"id_str"]firstObject]];
+            NSLog(@"got since_id=%@",since_id);
+            [defaults setObject:since_id forKey:@"TWITTER_SINCE_ID"];
+            
             timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:textArray,@"TWITTER_TEXT",nameArray,@"TWITTER_USER_NAME",iconArray,@"TWITTER_USER_ICON",dateArray,@"TWITTER_POST_DATE",[NSNumber numberWithBool:NO],@"ERROR",nil];
+            [defaults setObject:timelineDic forKey:@"TWITTER_TIME-LINE_DATA"];
             
             dispatch_semaphore_signal(seamphone);
 
@@ -291,7 +312,7 @@
                         
                     }else{
                         
-                        parametersDic=@{@"include_entities": @"1",@"count": @"200",@"since_id": since_id};
+                        parametersDic=@{@"include_entities": @"1",@"count": @"200",@"since_id": [defaults stringForKey:@"TWITTER_SINCE_ID"]};
                         NSLog(@"Parameter=%@",parametersDic);
                         
                     }
@@ -300,6 +321,7 @@
                     request.account = twAccount;
                     
                     [request performRequestWithHandler:^(NSData*responseData,NSHTTPURLResponse*urlResponse,NSError*error){
+                        
                         if (urlResponse) {
                             NSError *jsonError;
                             NSLog(@"Completion of receiving Twitter timeline data. Byte=%lu byte.",(unsigned long)responseData.length);
@@ -319,8 +341,10 @@
                                 dispatch_semaphore_signal(seamphone);
                                 
                             }else{
+                                
                                 timeLineArray=[[NSMutableArray alloc]initWithArray:responseArray];
                                 dispatch_semaphore_signal(seamphone);
+                            
                             }
                             
                         }else{
@@ -370,7 +394,7 @@
         dispatch_async(queue, ^{
             
             NSArray*iconURL_Array=[[NSArray alloc]initWithArray:[timeLineDic objectForKey:@"TWITTER_USER_ICON"]];
-            NSLog(@"4");
+            
             for (NSString*imageURL in iconURL_Array) {
                 
                 if ([userImageDic objectForKey:imageURL]==nil) {
@@ -380,6 +404,7 @@
                     [userImageDic setObject:imageData forKey:imageURL];
                     
                 }else{
+                    
                 }
             }
             
@@ -415,7 +440,7 @@
             NSArray*userImageDic_All_Keys=[userImageDic allKeys];
             
             for (NSString*key in userImageDic_All_Keys) {
-                NSLog(@"16");
+                
                 UIImage*image=[[UIImage alloc]initWithData:[userImageDic objectForKey:key]];
                 [imageDictionary setObject:image forKey:key];
                 
