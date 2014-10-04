@@ -9,9 +9,9 @@
 #import <UIKit/UIKit.h>
 #import <Accounts/Accounts.h>
 #import <Social/Social.h>
+#import "Reachability.h"
 #import "MODropAlertView.h"
-#import "NZAlertView.h"
-
+#import "TWMessageBarManager.h"
 @interface ViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate,MODropAlertViewDelegate>{
     
 }

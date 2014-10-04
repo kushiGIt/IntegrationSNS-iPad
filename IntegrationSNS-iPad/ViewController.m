@@ -16,8 +16,6 @@
     NSString*max_id;
     IBOutlet UITableView*mytableview;
     NSUserDefaults*defaults;
-    NSDictionary*twitterDataDic;
-    NSMutableDictionary*imageDictionary;
     UIRefreshControl *_refreshControl;
 }
 
@@ -27,8 +25,30 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-//    NSLog(@"%lu",(unsigned long)[self getTwitterTimeLineNewly].count);
-    NSLog(@"a=%@",[self getTwitterTimeLineNewly]);
+    
+    //Cheak Network
+    Reachability *reachablity = [Reachability reachabilityForInternetConnection];
+    NetworkStatus status = [reachablity currentReachabilityStatus];
+    
+    if (status==NotReachable) {
+        
+        NSLog(@"IOS is not connected to the Internet.");
+        [[TWMessageBarManager sharedInstance] showMessageWithTitle:@"ネットワークエラー" description:@"ネットワークに接続しないと更新できません。" type:TWMessageBarMessageTypeError duration:10.0f callback:^{
+            
+            NSLog(@"Message bar tapped.");
+            [[TWMessageBarManager sharedInstance] hideAllAnimated:YES];
+            
+        }];
+    
+    }else{
+        
+        NSLog(@"IOS is connected to the Internet.");
+        NSLog(@"%@",[self getTwitterProfileImage:[self getTwitterTimeLineNewly].mutableCopy]);
+        
+    }
+    
+    //NSLog(@"%s",[[[self getTwitterTimeLineNewly]objectForKey:@"ERROR"]boolValue] ? "YES":"NO");
+    
     
     
 }
@@ -64,7 +84,7 @@
     }
 }*/
 #pragma mark - get timeline
--(NSMutableArray*)getTwiterAndFacebookTimeLine{
+-(NSMutableArray*)getTwitterAndFacebookTimeLine{
     
     return  nil;
 }
@@ -150,29 +170,31 @@
     
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
         if (responsedArray[0]==[NSNull null]) {
             
             dispatch_async(mainQueue, ^{
                 
                 if ([responsedArray[1]isEqualToString:@"RESPONSED_DATA_IS_NULL"]) {
                     
-                    NSLog(@"Not any get twitter data");
+                    NSLog(@"=====DATA_ERROR=====");
                     
                 }else if ([responsedArray[1]isEqualToString:@"NOT_ANY_RESPONSED_DATA"]){
                     
+                    NSLog(@"=====HTTP-RESPONSE_ERRROR=====");
                     alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"サーバからの応答がありません。" okButtonTitle:@"OK"];
                     [alert show];
                     
                 }else if ([responsedArray[1]isEqualToString:@"ACCOUNT_ERROR"]){
                     
+                    NSLog(@"=====ACCOUNT_ERROR=====");
                     alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"Twitterアカウント" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
                     alert.delegate=self;
                     [alert show];
                     
                 }else{
                     
-                    NSLog(@"Unknown error");
+                    NSLog(@"=====UNKNOWN_ERROR=====");
                     alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"予期しないエラーです。" okButtonTitle:@"OK"];
                     [alert show];
                     
@@ -180,8 +202,8 @@
 
                 
             });
+            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:YES],@"ERROR", nil];
             
-            timelineDic=[NSDictionary dictionary];
             dispatch_semaphore_signal(seamphone);
             
         }else{
@@ -193,7 +215,7 @@
 
             
             dispatch_semaphore_t pigeonholeObjectWait=dispatch_semaphore_create(0);
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
                 
                 for (NSDictionary *tweet in responsedArray) {
                     
@@ -226,7 +248,7 @@
             
             dispatch_semaphore_wait(pigeonholeObjectWait, DISPATCH_TIME_FOREVER);
             
-            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:textArray,@"TWITTER_TEXT",nameArray,@"TWITTER_USER_NAME",iconArray,@"TWITTER_USER_ICON",dateArray,@"TWITTER_POST_DATE", nil];
+            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:textArray,@"TWITTER_TEXT",nameArray,@"TWITTER_USER_NAME",iconArray,@"TWITTER_USER_ICON",dateArray,@"TWITTER_POST_DATE",[NSNumber numberWithBool:NO],@"ERROR",nil];
             
             dispatch_semaphore_signal(seamphone);
 
@@ -245,7 +267,7 @@
     
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
         
         [accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted,NSError *accountsError){
             if (granted==YES) {
@@ -260,7 +282,7 @@
                     NSURL *url = [NSURL URLWithString:@"https://api.twitter.com/1.1/statuses/home_timeline.json"];
                     
                     //set parameters
-                    NSDictionary *parametersDic=[[NSDictionary alloc]init];
+                    __block NSDictionary *parametersDic=[[NSDictionary alloc]init];
                     
                     if ([defaults stringForKey:@"TWITTER_SINCE_ID"].length==0) {
                         
@@ -336,49 +358,95 @@
 
 }
 #pragma mark get user orofile image and convert
-/*-(void)getTwitterProfileImage{
-    NSMutableDictionary*userImageDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"USER_PROFILE-IMAGE_URL_AND_DATA"]];
-    iconArray=[[NSMutableArray alloc]initWithArray:[[defaults dictionaryForKey:@"TWITTER_TIMELINE_DATA"] objectForKey:@"TWITTER_USER_ICON"]];
+-(NSMutableDictionary*)getTwitterProfileImage:(NSMutableDictionary*)timeLineDic{
+    __block NSMutableDictionary*dic=[[NSMutableDictionary alloc]init];
+    __block NSMutableDictionary*userImageDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"USER_PROFILE-IMAGE_URL_AND_DATA"]];
     
-    for (NSString*imageURL in iconArray) {
-        if ([userImageDic objectForKey:imageURL]==nil) {
-            NSData*imageData=[NSData dataWithContentsOfURL:[NSURL URLWithString:imageURL]];
-            NSLog(@"Get image data. Data size is %ld",imageData.length);
-            [userImageDic setObject:imageData forKey:imageURL];
-        }else{
-        }
-    }
-    [defaults setObject:userImageDic forKey:@"USER_PROFILE-IMAGE_URL_AND_DATA"];
+    //Get data from URL
+    dispatch_semaphore_t seamphone_GetDataWait_=dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
+        
+        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+        dispatch_async(queue, ^{
+            
+            NSArray*iconURL_Array=[[NSArray alloc]initWithArray:[timeLineDic objectForKey:@"TWITTER_USER_ICON"]];
+            NSLog(@"4");
+            for (NSString*imageURL in iconURL_Array) {
+                
+                if ([userImageDic objectForKey:imageURL]==nil) {
+                    
+                    NSData*imageData=[NSData dataWithContentsOfURL:[NSURL URLWithString:imageURL]];
+                    NSLog(@"Get image data. Data size is %ld",imageData.length);
+                    [userImageDic setObject:imageData forKey:imageURL];
+                    
+                }else{
+                }
+            }
+            
+            [defaults setObject:userImageDic forKey:@"USER_PROFILE-IMAGE_URL_AND_DATA"];
+            [defaults synchronize];
+            
+            dispatch_semaphore_signal(seamphone_GetDataWait_);
+        });
+    });
     
-    [self convert_NSData_to_UIImage];
+    dispatch_semaphore_wait(seamphone_GetDataWait_, DISPATCH_TIME_FOREVER);
+    
+    //Get Image from data
+    dispatch_semaphore_t seamphone_ConvertWait_=dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
+        
+            dic=[self convert_NSData_to_UIImage:userImageDic];
+            
+            dispatch_semaphore_signal(seamphone_ConvertWait_);
+    
+    });
+    dispatch_semaphore_wait(seamphone_ConvertWait_, DISPATCH_TIME_FOREVER);
+    
+    return dic;
 }
--(void)convert_NSData_to_UIImage{
-    NSMutableDictionary*userImageDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"USER_PROFILE-IMAGE_URL_AND_DATA"]];
-    NSArray*userImageDic_All_Keys=[userImageDic allKeys];
+-(NSMutableDictionary*)convert_NSData_to_UIImage:(NSMutableDictionary*)userImageDic{
     
-    imageDictionary=[[NSMutableDictionary alloc]init];
+    __block NSMutableDictionary*imageDictionary=[[NSMutableDictionary alloc]init];
     
-    for (NSString*key in userImageDic_All_Keys) {
-        UIImage*image=[[UIImage alloc]initWithData:[userImageDic objectForKey:key]];
-        [imageDictionary setObject:image forKey:key];
-    }
+    dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+        
+            NSArray*userImageDic_All_Keys=[userImageDic allKeys];
+            
+            for (NSString*key in userImageDic_All_Keys) {
+                NSLog(@"16");
+                UIImage*image=[[UIImage alloc]initWithData:[userImageDic objectForKey:key]];
+                [imageDictionary setObject:image forKey:key];
+                
+            }
+        
+            dispatch_semaphore_signal(seamphone);
     
-}*/
+    });
+    dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+    return imageDictionary;
+}
 
 #pragma mark - UIAlertViewDelegate
 -(void)alertViewPressButton:(MODropAlertView *)alertView buttonType:(DropAlertButtonType)buttonType{
     NSLog(@"%s",__func__);
+    
     switch (buttonType) {
+        
         case DropAlertButtonOK:{
+            
             NSURL*url=[NSURL URLWithString:UIApplicationOpenSettingsURLString];
             [[UIApplication sharedApplication] openURL:url];
             break;
             
         }default:
+           
             NSLog(@"%s",__func__);
             break;
             
     }
+
 }
 /*
  dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -391,5 +459,9 @@
  dispatch_semaphore_signal(seamphone);
  });
  dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+ 
+ dispatch_queue_t mainQueue = dispatch_get_main_queue();
+ dispatch_async(mainQueue, ^{
+  });
  */
 @end
