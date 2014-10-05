@@ -43,7 +43,8 @@
     
     }else{
         
-        [self getTwitterAndFacebookTimeLineFromNSUserDefaults];
+        NSLog(@"IOS is connected to the Internet.");
+        NSMutableDictionary*dic=[[NSMutableDictionary alloc]initWithDictionary:[self getFaceBookTimeLine]];
         
     }
     
@@ -83,7 +84,9 @@
         NSLog(@"Need reload (use max_id)");
     }
 }*/
+
 #pragma mark - get timeline
+
 -(void)getTwitterAndFacebookTimeLine{
     //[[[self getTwitterTimeLineNewly] objectForKey:@"ERROR"]boolValue]
     NSDictionary*gotTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getTwitterTimeLineNewly]];
@@ -97,6 +100,7 @@
     }
     
 }
+
 -(void)getTwitterAndFacebookTimeLineFromNSUserDefaults{
     
     NSDictionary*twitterTimeLineDic=[[NSDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"TWITTER_TIME-LINE_DATA"]];
@@ -104,77 +108,199 @@
     NSLog(@"%@",twitterTimeLineDic);
 
 }
+
+
 #pragma mark Get facebook timeline
--(void)getFaceBookTimeLine{
-    ACAccountStore *accountStore = [[ACAccountStore alloc] init];
-    ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierFacebook];
+
+-(NSDictionary*)getFaceBookTimeLine{
     
-    NSDictionary*readOnlyOptions=@{ ACFacebookAppIdKey : @"1695130440712382",ACFacebookAudienceKey : ACFacebookAudienceOnlyMe,ACFacebookPermissionsKey:@[@"email"]};
-    [accountStore requestAccessToAccountsWithType:accountType options:readOnlyOptions completion:^(BOOL granted, NSError *accountsError){
-        if (granted) {
-            NSArray *facebookAccounts = [accountStore accountsWithAccountType:accountType];
-            if (facebookAccounts.count>0) {
-                ACAccount *facebookAccount = [facebookAccounts lastObject];
-                //Get AccessToken
-                ACAccountCredential *facebookCredential = [facebookAccount credential];
-                NSString *accessToken = [facebookCredential oauthToken];
-                //Set GraphApi
-                NSURL*url=[NSURL URLWithString:[NSString stringWithFormat:@"https://graph.facebook.com/me/home?access_token=%@&limit=300",accessToken]];
-                //Get NewsFeed
-                NSError*getNewsfeedError;
-                NSData*getNewsFeedJSONData=[NSData dataWithContentsOfURL:url options:NSDataReadingMapped error:&getNewsfeedError];
-                if (getNewsfeedError) {
-                    NSLog(@"%@",getNewsfeedError);
+    __block NSMutableArray*newsfeed=[[NSMutableArray alloc]initWithArray:[self getFacebookTimeLineFromServer]];
+    __block NSDictionary*timelineDic;
+    __block MODropAlertView *alert;
+    dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    
+    dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
+        
+        if (newsfeed[0]==[NSNull null]) {
+            
+            dispatch_async(mainQueue, ^{
+                
+                if ([newsfeed[1]isEqualToString:@"RESPONSED_DATA_IS_NULL"]) {
+                    
+                    NSLog(@"=====DATA_ERROR=====");
+                    
+                }else if ([newsfeed[1]isEqualToString:@"NOT_ANY_RESPONSED_DATA"]){
+                    
+                    NSLog(@"=====HTTP-RESPONSE_ERRROR=====");
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"サーバからの応答がありません。" okButtonTitle:@"OK"];
+                    [alert show];
+                    
+                }else if ([newsfeed[1]isEqualToString:@"ACCOUNT_ERROR"]){
+                    
+                    NSLog(@"=====ACCOUNT_ERROR=====");
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"Facebookアカウント" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
+                    alert.delegate=self;
+                    [alert show];
+                    
                 }else{
-                    NSLog(@"Completion of receiving NewsFeed data. Byte=%lu byte.",(unsigned long)getNewsFeedJSONData.length);
+                    
+                    NSLog(@"=====UNKNOWN_ERROR=====");
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"予期しないエラーです。" okButtonTitle:@"OK"];
+                    [alert show];
+                    
                 }
-                //Conversion
-                NSError *jsonError;
-                NSArray *newsfeed = [NSJSONSerialization JSONObjectWithData:getNewsFeedJSONData options:NSJSONReadingMutableLeaves error:&jsonError];
-                if (jsonError) {
-                    NSLog(@"%@",jsonError);
-                }else{
-                    NSLog(@"Conversion JSONData to Array.");
-                }
-                //                NSLog(@"%@",[[newsfeed valueForKey:@"data"]firstObject]);
-                for (int i; i<[[newsfeed valueForKey:@"data"]count];i++) {
-                    NSLog(@"============================Post-%d-Data============================",i);
-                    //Who created
-                    NSLog(@"Create by %@",[NSString stringWithFormat:@"%@",[[[newsfeed valueForKey:@"data"]valueForKey:@"from"]valueForKey:@"name"][i]]);
-                    //What is main_messege
-                    NSLog(@"Main_Messege=%@",[NSString stringWithFormat:@"%@",[[newsfeed valueForKey:@"data"]valueForKey:@"message"][i]]);
-                    //when is the messege created
-                    NSString*Original_ISO_8601_Date=[NSString stringWithFormat:@"%@",[[newsfeed valueForKey:@"data"]valueForKey:@"created_time"][i]];
+                
+                
+            });
+            
+            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:YES],@"ERROR", nil];
+            
+            dispatch_semaphore_signal(seamphone);
+            
+        }else{
+            
+            timelineDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"FACEBOOK_TIME-LINE_DATA"]];
+            NSMutableArray *textArray=[[NSMutableArray alloc]initWithArray:[timelineDic objectForKey:@"FACEBOOK_TEXT"]];
+            NSMutableArray *nameArray=[[NSMutableArray alloc]initWithArray:[timelineDic objectForKey:@"FACEBOOK_USER_NAME"]];
+            NSMutableArray *dateArray=[[NSMutableArray alloc]initWithArray:[timelineDic objectForKey:@"FACEBOOK_POST_DATE"]];
+            NSMutableArray *likeArray=[[NSMutableArray alloc]initWithArray:[timelineDic objectForKey:@"FACEBOOK_LIKE_DATA"]];
+            
+            dispatch_semaphore_t convertWait=dispatch_semaphore_create(0);
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
+                
+                for (int i=0; i<[newsfeed count]-1;i++) {
+                    
+                    [nameArray addObject:[[newsfeed valueForKey:@"from"]valueForKey:@"name"][i]];
+                    
+                    [textArray addObject:[newsfeed valueForKey:@"message"][i]];
+                    
+                    NSString*Original_ISO_8601_Date=[NSString stringWithFormat:@"%@",[newsfeed valueForKey:@"created_time"][i]];
                     NSDate* date_converted;
                     NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
                     [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
                     date_converted = [formatter dateFromString:Original_ISO_8601_Date];
-                    NSLog(@"convert results=%@",date_converted);
-                    //How many is this messege like_count
-                    if ([[[[[newsfeed valueForKey:@"data"]valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i]isEqual:[NSNull null]]==YES) {
-                        NSLog(@"Not any likes");
+                    [dateArray addObject:date_converted];
+                    
+                    if ([[[[newsfeed valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i] isEqual:[NSNull null]]==YES) {
+                        
+                        [likeArray addObject:@"NOT_ANY_LIKE"];
+                        
                     }else{
-                        NSLog(@"Likes_Count=%lu",(unsigned long)[[[[[newsfeed valueForKey:@"data"]valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i]count]);
+                        
+                        [likeArray addObject:[[[newsfeed valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i]];
+                    
                     }
+                
                 }
+                
+                dispatch_semaphore_signal(convertWait);
+                
+            });
+            
+            dispatch_semaphore_wait(convertWait, DISPATCH_TIME_FOREVER);
+            
+            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:textArray,@"FACEBOOK_TEXT",nameArray,@"FACEBOOK_USER_NAME",likeArray,@"FACEBOOK_LIKE_DATA",dateArray,@"FACEBOOK_POST_DATE",[NSNumber numberWithBool:NO],@"ERROR",nil];
+            [defaults setObject:timelineDic forKey:@"FACEBOOK_TIME-LINE_DATA"];
 
-            }else{
-                [self getFacebookTimeLineErrorAlert:accountsError];
-            }
-        }else{
-            [self getFacebookTimeLineErrorAlert:accountsError];
+            
+            dispatch_semaphore_signal(seamphone);
+            
         }
-    }];
+    });
+    
+    dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+    
+    return timelineDic;
+
 }
--(void)getFacebookTimeLineErrorAlert:(NSError*)error{
-    if (error) {
-        NSLog(@"%s,%@",__func__,error);
-    }else{
-        NSLog(@"========Facebook account is error========");
-    }
-    MODropAlertView *alert =[[MODropAlertView alloc]initDropAlertWithTitle:@"Facebook Account" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
-    alert.delegate=self;
-    [alert show];
+
+-(NSMutableArray*)getFacebookTimeLineFromServer{
+    NSLog(@"Start that get facebook timeline from server");
+    ACAccountStore *accountStore = [[ACAccountStore alloc] init];
+    ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierFacebook];
+    __block NSMutableArray*timeLineArray;
+    
+    NSDictionary*readOnlyOptions=@{ ACFacebookAppIdKey : @"1695130440712382",ACFacebookAudienceKey : ACFacebookAudienceOnlyMe,ACFacebookPermissionsKey:@[@"email"]};
+    
+    dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+        
+        [accountStore requestAccessToAccountsWithType:accountType options:readOnlyOptions completion:^(BOOL granted, NSError *accountsError){
+            
+            if (granted==YES) {
+                
+                NSArray *facebookAccounts = [accountStore accountsWithAccountType:accountType];
+                
+                if (facebookAccounts!=nil&&facebookAccounts.count!=0) {
+                    
+                    ACAccount *facebookAccount = [facebookAccounts lastObject];
+                    
+                    ACAccountCredential *facebookCredential = [facebookAccount credential];
+                    NSString *accessToken = [facebookCredential oauthToken];
+                    
+                    NSURL*url=[NSURL URLWithString:@"https://graph.facebook.com/me/home"];
+                    NSDictionary*parametersDic=[[NSDictionary alloc]init];
+                    parametersDic=@{@"access_token":accessToken,@"limit":@300};
+                    
+                    SLRequest *request = [SLRequest requestForServiceType:SLServiceTypeFacebook requestMethod:SLRequestMethodGET URL:url parameters:parametersDic];
+                    request.account = facebookAccount;
+                    
+                    [request performRequestWithHandler:^(NSData*responseData,NSHTTPURLResponse*urlResponse,NSError*error){
+                        
+                        if (urlResponse) {
+                            
+                            NSError *jsonError;
+                            NSLog(@"Completion of receiving Facebook timeline data. Byte=%lu byte.",(unsigned long)responseData.length);
+                            
+                            NSMutableArray*responseArray=[NSJSONSerialization JSONObjectWithData:responseData options:NSJSONReadingMutableLeaves error:&jsonError];
+                            
+                            if (jsonError) {
+                                
+                                NSLog(@"%s,%@",__func__,jsonError);
+                                
+                            }
+                            
+                            if ([[responseArray valueForKey:@"data"]count]==0) {
+                                
+                                NSLog(@"ResponseData is NULL");
+                                timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"RESPONSED_DATA_IS_NULL", nil];
+                                dispatch_semaphore_signal(seamphone);
+                                
+                            }else{
+                                
+                                timeLineArray=[[NSMutableArray alloc]initWithArray:[responseArray valueForKey:@"data"]];
+                                dispatch_semaphore_signal(seamphone);
+                                
+                            }
+                            
+                        }else{
+                            
+                            timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"NOT_ANY_RESPONSED_DATA", nil];
+                            dispatch_semaphore_signal(seamphone);
+                            
+                        }
+                        
+                    }];
+                }else{
+                    
+                    timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"ACCOUNT_ERROR", nil];
+                    dispatch_semaphore_signal(seamphone);
+                    
+                }
+            }else{
+                
+                timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"ACCOUNT_ERROR", nil];
+                dispatch_semaphore_signal(seamphone);
+                
+            }
+        }];
+    });
+    
+    
+    dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+    
+    return timeLineArray;
 }
 
 #pragma mark - Get Twitter timeline
@@ -230,7 +356,7 @@
             NSMutableArray *dateArray=[[NSMutableArray alloc]initWithArray:[timelineDic objectForKey:@"TWITTER_POST_DATE"]];
 
             
-            dispatch_semaphore_t pigeonholeObjectWait=dispatch_semaphore_create(0);
+            dispatch_semaphore_t convertWait=dispatch_semaphore_create(0);
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
                 
                 for (NSDictionary *tweet in responsedArray) {
@@ -258,11 +384,11 @@
                 }
                 
                 
-                dispatch_semaphore_signal(pigeonholeObjectWait);
+                dispatch_semaphore_signal(convertWait);
             
             });
             
-            dispatch_semaphore_wait(pigeonholeObjectWait, DISPATCH_TIME_FOREVER);
+            dispatch_semaphore_wait(convertWait, DISPATCH_TIME_FOREVER);
             
             NSString*since_id=[NSString stringWithFormat:@"%@",[[responsedArray valueForKey:@"id_str"]firstObject]];
             NSLog(@"got since_id=%@",since_id);

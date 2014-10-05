@@ -387,6 +387,8 @@ static NSString* kAlertCancelButtonHighlightColor = @"#b0120a";
     if ([self.delegate respondsToSelector:@selector(alertViewPressButton:buttonType:)]) {
         [self.delegate alertViewPressButton:self buttonType:buttonType];
     }
+    
+    [self dismiss];
 }
 
 #pragma mark - Util Methods
