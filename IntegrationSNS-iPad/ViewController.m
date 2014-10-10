@@ -24,6 +24,14 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    //TODO: read from nsuserdefaults,
+}
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
+}
+-(void)viewDidAppear:(BOOL)animated{
+    [super viewDidAppear:YES];
     //Set UserDefaults
     defaults=[NSUserDefaults standardUserDefaults];
     
@@ -40,16 +48,12 @@
             [[TWMessageBarManager sharedInstance] hideAllAnimated:YES];
             
         }];
-    
+        
     }else{
         
         [self getTwitterAndFacebookTimeLine];
+        
     }
-    
-}
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 #pragma mark - TableView methods
 /*- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -88,10 +92,10 @@
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
         
         gotTwitterTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getTwitterTimeLineNewly]];
-       // gotFacebookTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getFaceBookTimeLine]];
+        gotFacebookTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getFaceBookTimeLine]];
         
         dispatch_semaphore_signal(seamphone);
-    
+        
     });
     
 //    NSMutableArray*array=[[NSMutableArray alloc]init];
