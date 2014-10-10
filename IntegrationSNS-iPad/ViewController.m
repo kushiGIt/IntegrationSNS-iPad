@@ -43,11 +43,9 @@
     
     }else{
         
-        NSLog(@"IOS is connected to the Internet.");
         [self getTwitterAndFacebookTimeLine];
-        
     }
-
+    
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
@@ -80,63 +78,35 @@
         NSLog(@"Need reload (use max_id)");
     }
 }*/
-
 #pragma mark - get timeline
-
 -(void)getTwitterAndFacebookTimeLine{
     
     __block NSDictionary*gotFacebookTimeLineDic;
     __block NSDictionary*gotTwitterTimeLineDic;
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
-    dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+    dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
         
-        //gotTwitterTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getTwitterTimeLineNewly]];
-        gotFacebookTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getFaceBookTimeLine]];
+        gotTwitterTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getTwitterTimeLineNewly]];
+       // gotFacebookTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getFaceBookTimeLine]];
         
         dispatch_semaphore_signal(seamphone);
+    
     });
-    dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
     
-    /*===TWITTER===*/
-//    if ([[gotTwitterTimeLineDic objectForKey:@"ERROR"]boolValue]==NO) {
-//        
-//        NSLog(@"twitter have no error;");
-//        NSArray*testArray=[[NSArray alloc]initWithArray:[gotTwitterTimeLineDic objectForKey:@"TWITTER_DATA"]];
-//        
-//        for (NSDictionary*dic in testArray) {
-//            
-//            NSString*str=[NSString stringWithFormat:@"%@",[dic objectForKey:@"TWITTER_TEXT"]];
-//            NSLog(@"%ld",str.length);
-//        
-//        }
-//        
-//    }else{
-//        
-//        NSLog(@"twitter have same error");
+//    NSMutableArray*array=[[NSMutableArray alloc]init];
 //    
-//    }
-    
-    
-    /*===FACEBOOK==*/
-    if ([[gotFacebookTimeLineDic objectForKey:@"ERROR"]boolValue]==NO) {
-    
-        NSLog(@"facebook have no error;");
-        NSArray*testArray=[[NSArray alloc]initWithArray:[gotFacebookTimeLineDic objectForKey:@"FACEBOOK_DATA"]];
-        
-        for (NSDictionary*dic in testArray) {
-            
-            NSString*str=[NSString stringWithFormat:@"%@",[dic objectForKey:@"FACEBOOK_TEXT"]];
-            NSLog(@"%ld",str.length);
-        
-        }
-        
-    }else{
-        
-        NSLog(@"facebook have same error");
-        
-    }
-    
+//    [array addObject:[gotTwitterTimeLineDic objectForKey:@"TWITTER_DATA"]];
+//    [array addObject:[gotFacebookTimeLineDic objectForKey:@"FACEBOOK_DATA"]];
+//    
+//    NSSortDescriptor *sortDescNumber;
+//    sortDescNumber = [[NSSortDescriptor alloc] initWithKey:@"POST_DATE" ascending:YES];
+//    
+//    NSArray*sortDescArray=[[NSArray alloc]initWithObjects:sortDescNumber, nil];
+//    
+//    NSArray *sortArray=[array sortedArrayUsingDescriptors:sortDescArray];
+//    
+//    NSLog(@"%@",sortArray);
 }
 #pragma mark - Get Twitter timeline
 -(NSDictionary*)getTwitterTimeLineFromLocalNSUserDeafalults{
@@ -150,15 +120,17 @@
     
     __block NSMutableArray*responsedArray=[[NSMutableArray alloc]initWithArray:[self getTwitterTimeLineNewlyFromServer]];
     __block NSDictionary*timelineDic;
-    __block MODropAlertView *alert;
-    dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    //__block MODropAlertView *alert;
+    //dispatch_queue_t mainQueue = dispatch_get_main_queue();
     
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
         if (responsedArray[0]==[NSNull null]) {
             
-            dispatch_async(mainQueue, ^{
+            NSError*twitterError=responsedArray[1];
+            
+            /*dispatch_async(mainQueue, ^{
                 
                 if ([responsedArray[1]isEqualToString:@"RESPONSED_DATA_IS_NULL"]) {
                     
@@ -186,8 +158,9 @@
                 }
 
                 
-            });
+            });*/
             timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:YES],@"ERROR", nil];
+            NSLog(@"Twitter convert Failured");
             
             dispatch_semaphore_signal(seamphone);
             
@@ -202,7 +175,8 @@
                     
                     NSMutableDictionary*dic=[[NSMutableDictionary alloc]init];
                     
-                    [dic setObject:[tweet objectForKey:@"text"] forKey:@"TWITTER_TEXT"];
+                    NSString*twitterTextStr=[NSString stringWithFormat:@"%@",[tweet objectForKey:@"text"]];
+                    [dic setObject:twitterTextStr forKey:@"TWITTER_TEXT"];
                     
                     NSDictionary *user = tweet[@"user"];
                     [dic setObject:user[@"screen_name"] forKey:@"TWITTER_USER_NAME"];
@@ -220,7 +194,9 @@
                     NSCalendar *calendar = [NSCalendar currentCalendar];
                     comps.hour=9;
                     date=[calendar dateByAddingComponents:comps toDate:date options:0];
-                    [dic setObject:date forKey:@"TWITTER_POST_DATE"];
+                    [dic setObject:date forKey:@"POST_DATE"];
+#warning test!
+                    NSLog(@"%@",dic);
                     
                     [array addObject:dic];
                 
@@ -242,6 +218,8 @@
             [defaults setObject:data forKey:@"TWITTER_TIME-LINE_DATA"];
             
             dispatch_semaphore_signal(seamphone);
+            
+            NSLog(@"Twitter convert Success");
 
         }
     });
@@ -256,11 +234,13 @@
     ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierTwitter];
     __block NSMutableArray*timeLineArray;
     
-    
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
-    dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+    
+    
+    [accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted,NSError *accountsError){
         
-        [accountStore requestAccessToAccountsWithType:accountType options:nil completion:^(BOOL granted,NSError *accountsError){
+        dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+            
             if (granted==YES) {
                 
                 NSArray*accounts=[accountStore accountsWithAccountType:accountType];
@@ -301,25 +281,68 @@
                             if (jsonError) {
                                 
                                 NSLog(@"%s,%@",__func__,jsonError);
-                                
-                            }
                             
-                            if (responseArray.count==0) {
-                                
-                                NSLog(@"ResponseData is NULL");
-                                timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"RESPONSED_DATA_IS_NULL", nil];
-                                dispatch_semaphore_signal(seamphone);
-                                
                             }else{
                                 
-                                timeLineArray=[[NSMutableArray alloc]initWithArray:responseArray];
-                                dispatch_semaphore_signal(seamphone);
-                            
+                                if ([[[responseArray valueForKey:@"errors"]valueForKey:@"message"]isEqual:[NSNull null]]) {
+                                    
+                                    NSLog(@"twitter request...Failured");
+                                    NSString*errorCode=[NSString stringWithFormat:@"%@",[[responseArray valueForKey:@"errors"]valueForKey:@"code"][0]];
+                                    NSString*errorMessege=[NSString stringWithFormat:@"%@",[[responseArray valueForKey:@"errors"]valueForKey:@"message"][0]];
+                                    NSLog(@"%@",errorCode);
+                                    NSLog(@"%@",errorMessege);
+                                    
+                                    NSMutableDictionary*errDetails = [NSMutableDictionary dictionary];
+                                    [errDetails setValue:errorMessege forKey:NSLocalizedDescriptionKey];
+                                    NSError*twitterError = [NSError errorWithDomain:@"https://api.twitter.com/1.1/statuses/home_timeline.json" code:[errorCode integerValue] userInfo:errDetails];
+                                    
+                                    timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],twitterError, nil];
+                                    
+                                    NSLog(@"twitter results (error)==>%@",timeLineArray);
+                                    
+                                    
+                                }else{
+                                    
+                                    if (responseArray.count==0) {
+                                        
+                                        NSLog(@"There is no new data.");
+                                        
+                                        NSMutableDictionary*errDetails = [NSMutableDictionary dictionary];
+                                        [errDetails setValue:@"There is no new data." forKey:NSLocalizedDescriptionKey];
+                                        NSError*twitterError = [NSError errorWithDomain:@"https://api.twitter.com/1.1/statuses/home_timeline.json" code:100 userInfo:errDetails];
+                                        
+                                        timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],twitterError, nil];
+                                        
+                                        NSLog(@"twitter results (error)==>%@",timeLineArray);
+                                        
+                                        NSLog(@"twitter request...Failured(Success)");
+                                        
+                                        dispatch_semaphore_signal(seamphone);
+                                        
+                                    }else{
+                                        
+                                        timeLineArray=[[NSMutableArray alloc]initWithArray:responseArray];
+                                        NSLog(@"twitter request...Success");
+                                        dispatch_semaphore_signal(seamphone);
+                                        
+                                    }
+                                    
+                                }
+                                
                             }
-                            
+                        
                         }else{
                             
-                            timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"NOT_ANY_RESPONSED_DATA", nil];
+                            NSMutableDictionary*errDetails = [NSMutableDictionary dictionary];
+                            [errDetails setValue:@"There was no response from the server." forKey:NSLocalizedDescriptionKey];
+                            NSError*twitterError = [NSError errorWithDomain:@"https://api.twitter.com/1.1/statuses/home_timeline.json" code:101 userInfo:errDetails];
+                            
+                            timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],twitterError, nil];
+                            
+                            NSLog(@"twitter results (error)==>%@",timeLineArray);
+                            
+                            NSLog(@"twitter request...Failured");
+                            
                             dispatch_semaphore_signal(seamphone);
                             
                         }
@@ -328,28 +351,45 @@
                     
                     
                 }else{
+                
+                    NSMutableDictionary*errDetails = [NSMutableDictionary dictionary];
+                    [errDetails setValue:@"App does not have a valid Twitter account." forKey:NSLocalizedDescriptionKey];
+                    NSError*twitterError = [NSError errorWithDomain:@"https://api.twitter.com/1.1/statuses/home_timeline.json" code:102 userInfo:errDetails];
                     
-                    timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"ACCOUNT_ERROR", nil];
+                    timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],twitterError, nil];
+                    
+                    NSLog(@"twitter results (error)==>%@",timeLineArray);
+                    
+                    NSLog(@"twitter request...Failured");
+                    
                     dispatch_semaphore_signal(seamphone);
                     
                 }
                 
             }else{
                 
-                timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"ACCOUNT_ERROR", nil];
+                NSMutableDictionary*errDetails = [NSMutableDictionary dictionary];
+                [errDetails setValue:@"The user did not accept the permission of the account of app." forKey:NSLocalizedDescriptionKey];
+                NSError*twitterError = [NSError errorWithDomain:@"https://api.twitter.com/1.1/statuses/home_timeline.json" code:103 userInfo:errDetails];
+                
+                timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],twitterError, nil];
+                
+                NSLog(@"twitter results (error)==>%@",timeLineArray);
+                
+                NSLog(@"twitter request...Failured");
+                
                 dispatch_semaphore_signal(seamphone);
-                
-                
+            
             }
             
-        }];
-    
-    });
-    
+        });
+        
+    }];
     
     dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
+    
     return timeLineArray;
-
+    
 }
 #pragma mark get user profile image and convert
 -(NSMutableDictionary*)getTwitterProfileImage:(NSMutableDictionary*)timeLineDic{
@@ -467,7 +507,7 @@
                 }else if ([newsfeed[1]isEqualToString:@"NOT_ANY_RESPONSED_DATA"]){
                     
                     NSLog(@"=====HTTP-RESPONSE_ERRROR=====");
-                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"Facebookのサーバにアクセスしましたが応答がありませんでした。時間が経ってから、もう一度アクセスしてください" okButtonTitle:@"OK"];
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"Facebookのサーバにアクセスしましたが応答がありませんでした。時間が経ってから、もう一度アクセスしてください。" okButtonTitle:@"OK"];
                     [alert show];
                     
                 }else if ([newsfeed[1]isEqualToString:@"ACCOUNT_ERROR"]){
@@ -494,7 +534,6 @@
         }else{
             
             NSMutableArray*array=[[NSMutableArray alloc]initWithArray:[[self getFacebookTimeLineFromLocalNSUserDeafalults] objectForKey:@"FACEBOOK_DATA"]];
-            NSLog(@"%@",newsfeed);
             
             for (int i=0; i<[newsfeed count]-1;i++) {
                 
@@ -509,7 +548,7 @@
                 NSDateFormatter* formatter = [[NSDateFormatter alloc] init];
                 [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
                 date_converted = [formatter dateFromString:Original_ISO_8601_Date];
-                [dic setObject:date_converted forKey:@"FACEBOOK_POST_DATE"];
+                [dic setObject:date_converted forKey:@"POST_DATE"];
                 
                 if ([[[[newsfeed valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i] isEqual:[NSNull null]]==YES) {
                     
@@ -549,7 +588,7 @@
     __block NSMutableArray*timeLineArray;
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
-    dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+    dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
         
         ACAccountStore *accountStore = [[ACAccountStore alloc] init];
         ACAccountType *accountType = [accountStore accountTypeWithAccountTypeIdentifier:ACAccountTypeIdentifierFacebook];
@@ -578,6 +617,10 @@
                     
                     [request performRequestWithHandler:^(NSData*responseData,NSHTTPURLResponse*urlResponse,NSError*error){
                         
+                        if (error) {
+                            NSLog(@"Facebook error==>%@",error);
+                        }
+                        
                         if (urlResponse) {
                             
                             NSError *jsonError;
@@ -596,6 +639,7 @@
                                 NSLog(@"ResponseData is NULL");
                                 timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"RESPONSED_DATA_IS_NULL", nil];
                                 dispatch_semaphore_signal(seamphone);
+                                NSLog(@"results = %@",responseArray);
                                 
                             }else{
                                 
@@ -657,7 +701,6 @@
             
             if (setCountForComparison==set.count) {
                 
-                NSLog(@"This object is duplication (object at index %d)",index-1);
                 [duplicateIndex addIndex:index-1];
                 
             }else{
@@ -674,6 +717,8 @@
         dispatch_semaphore_signal(wait_createNSSet);
     
     });
+    
+    dispatch_semaphore_wait(wait_createNSSet, DISPATCH_TIME_FOREVER);
     
     return timelineMutableDic.copy;
 }
