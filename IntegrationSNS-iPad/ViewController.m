@@ -24,13 +24,13 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    //TODO: read from nsuserdefaults,
+    
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
--(void)viewDidAppear:(BOOL)animated{
+-(void)viewDidAppear:(BOOL)animated{//recive from server
     [super viewDidAppear:YES];
     //Set UserDefaults
     defaults=[NSUserDefaults standardUserDefaults];
@@ -91,7 +91,7 @@
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
         
-        gotTwitterTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getTwitterTimeLineNewly]];
+        //gotTwitterTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getTwitterTimeLineNewly]];
         gotFacebookTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getFaceBookTimeLine]];
         
         dispatch_semaphore_signal(seamphone);
@@ -199,8 +199,6 @@
                     comps.hour=9;
                     date=[calendar dateByAddingComponents:comps toDate:date options:0];
                     [dic setObject:date forKey:@"POST_DATE"];
-#warning test!
-                    NSLog(@"%@",dic);
                     
                     [array addObject:dic];
                 
@@ -492,7 +490,7 @@
     
     __block NSMutableArray*newsfeed=[[NSMutableArray alloc]init];
     __block NSDictionary*timelineDic;
-    __block MODropAlertView *alert;
+    //__block MODropAlertView *alert;
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
@@ -501,7 +499,7 @@
         
         if (newsfeed[0]==[NSNull null]) {
             
-            dispatch_queue_t mainQueue = dispatch_get_main_queue();
+            /*dispatch_queue_t mainQueue = dispatch_get_main_queue();
             dispatch_async(mainQueue, ^{
                 
                 if ([newsfeed[1]isEqualToString:@"RESPONSED_DATA_IS_NULL"]) {
@@ -529,7 +527,7 @@
                     
                 }
             
-            });
+            });*/
             
             timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:YES],@"ERROR", nil];
             
@@ -636,25 +634,67 @@
                                 
                                 NSLog(@"%s,%@",__func__,jsonError);
                                 
-                            }
-                            
-                            if ([[responseArray valueForKey:@"data"]count]==0) {
-                                
-                                NSLog(@"ResponseData is NULL");
-                                timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"RESPONSED_DATA_IS_NULL", nil];
-                                dispatch_semaphore_signal(seamphone);
-                                NSLog(@"results = %@",responseArray);
-                                
                             }else{
                                 
-                                timeLineArray=[[NSMutableArray alloc]initWithArray:[responseArray valueForKey:@"data"]];
-                                dispatch_semaphore_signal(seamphone);
+                                if ([[[responseArray valueForKey:@"error"]valueForKey:@"message"]isEqual:[NSNull null]]) {
+                                    
+                                    NSLog(@"facebook request...Failured");
+                                    NSString*errorCode=[NSString stringWithFormat:@"%@",[[responseArray valueForKey:@"errors"]valueForKey:@"code"][0]];
+                                    NSString*errorMessege=[NSString stringWithFormat:@"%@",[[responseArray valueForKey:@"errors"]valueForKey:@"message"][0]];
+                                    NSLog(@"%@",errorCode);
+                                    NSLog(@"%@",errorMessege);
+                                    
+                                    NSMutableDictionary*errDetails = [NSMutableDictionary dictionary];
+                                    [errDetails setValue:errorMessege forKey:NSLocalizedDescriptionKey];
+                                    NSError*twitterError = [NSError errorWithDomain:@"https://graph.facebook.com/me/home" code:[errorCode integerValue] userInfo:errDetails];
+                                    
+                                    timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],twitterError, nil];
+                                    
+                                    NSLog(@"facebook results (error)==>%@",timeLineArray);
+                                    
+                                }else{
+                                    
+                                    if ([[responseArray valueForKey:@"data"]count]==0) {
+                                        
+                                        NSLog(@"There is no new data.");
+                                        
+                                        NSMutableDictionary*errDetails = [NSMutableDictionary dictionary];
+                                        [errDetails setValue:@"There is no new data." forKey:NSLocalizedDescriptionKey];
+                                        NSError*twitterError = [NSError errorWithDomain:@"https://graph.facebook.com/me/home" code:200 userInfo:errDetails];
+                                        
+                                        timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],twitterError, nil];
+                                        
+                                        NSLog(@"twitter results (error)==>%@",timeLineArray);
+                                        
+                                        NSLog(@"twitter request...Failured(Success)");
+                                        
+                                        dispatch_semaphore_signal(seamphone);
+                                        
+                                    }else{
+                                        
+                                        timeLineArray=[[NSMutableArray alloc]initWithArray:[responseArray valueForKey:@"data"]];
+                                        NSLog(@"facebook request...Success");
+                                        dispatch_semaphore_signal(seamphone);
+                                        
+                                    }
+                                    
+                                }
                                 
                             }
+                            
                             
                         }else{
                             
-                            timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"NOT_ANY_RESPONSED_DATA", nil];
+                            NSMutableDictionary*errDetails = [NSMutableDictionary dictionary];
+                            [errDetails setValue:@"There was no response from the server." forKey:NSLocalizedDescriptionKey];
+                            NSError*twitterError = [NSError errorWithDomain:@"https://graph.facebook.com/me/home" code:201 userInfo:errDetails];
+                            
+                            timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],twitterError, nil];
+                            
+                            NSLog(@"facebook results (error)==>%@",timeLineArray);
+                            
+                            NSLog(@"facebook request...Failured");
+                            
                             dispatch_semaphore_signal(seamphone);
                             
                         }
@@ -662,13 +702,31 @@
                     }];
                 }else{
                     
-                    timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"ACCOUNT_ERROR", nil];
+                    NSMutableDictionary*errDetails = [NSMutableDictionary dictionary];
+                    [errDetails setValue:@"App does not have a valid facebook account." forKey:NSLocalizedDescriptionKey];
+                    NSError*twitterError = [NSError errorWithDomain:@"https://graph.facebook.com/me/home" code:202 userInfo:errDetails];
+                    
+                    timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],twitterError, nil];
+                    
+                    NSLog(@"facebook results (error)==>%@",timeLineArray);
+                    
+                    NSLog(@"facebook request...Failured");
+                    
                     dispatch_semaphore_signal(seamphone);
                     
                 }
             }else{
                 
-                timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],@"ACCOUNT_ERROR", nil];
+                NSMutableDictionary*errDetails = [NSMutableDictionary dictionary];
+                [errDetails setValue:@"The user did not accept the permission of the account of app." forKey:NSLocalizedDescriptionKey];
+                NSError*twitterError = [NSError errorWithDomain:@"https://graph.facebook.com/me/home" code:203 userInfo:errDetails];
+                
+                timeLineArray=[[NSMutableArray alloc]initWithObjects:[NSNull null],twitterError, nil];
+                
+                NSLog(@"facebook results (error)==>%@",timeLineArray);
+                
+                NSLog(@"facebook request...Failured");
+                
                 dispatch_semaphore_signal(seamphone);
                 
             }
