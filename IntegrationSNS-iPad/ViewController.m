@@ -24,6 +24,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    //Set UserDefaults
+    defaults=[NSUserDefaults standardUserDefaults];
     
 }
 - (void)didReceiveMemoryWarning {
@@ -32,8 +34,6 @@
 }
 -(void)viewDidAppear:(BOOL)animated{//recive from server
     [super viewDidAppear:YES];
-    //Set UserDefaults
-    defaults=[NSUserDefaults standardUserDefaults];
     
     //Cheak Network
     Reachability *reachablity = [Reachability reachabilityForInternetConnection];
@@ -42,7 +42,7 @@
     if (status==NotReachable) {
         
         NSLog(@"IOS is not connected to the Internet.");
-        [[TWMessageBarManager sharedInstance] showMessageWithTitle:@"ネットワークエラー" description:@"ネットワークに接続しないと更新できません。" type:TWMessageBarMessageTypeError duration:10.0f callback:^{
+        [[TWMessageBarManager sharedInstance] showMessageWithTitle:@"ネットワークエラー" description:@"ネットワークに接続しないと更新できません。" type:TWMessageBarMessageTypeError duration:5.0f callback:^{
             
             NSLog(@"Message bar tapped.");
             [[TWMessageBarManager sharedInstance] hideAllAnimated:YES];
@@ -91,8 +91,8 @@
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
         
-        //gotTwitterTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getTwitterTimeLineNewly]];
-        gotFacebookTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getFaceBookTimeLine]];
+        gotTwitterTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getTwitterTimeLineNewly]];
+        //gotFacebookTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getFaceBookTimeLine]];
         
         dispatch_semaphore_signal(seamphone);
         
@@ -124,45 +124,48 @@
     
     __block NSMutableArray*responsedArray=[[NSMutableArray alloc]initWithArray:[self getTwitterTimeLineNewlyFromServer]];
     __block NSDictionary*timelineDic;
-    //__block MODropAlertView *alert;
-    //dispatch_queue_t mainQueue = dispatch_get_main_queue();
+    __block MODropAlertView *alert;
+    dispatch_queue_t mainQueue = dispatch_get_main_queue();
     
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
         if (responsedArray[0]==[NSNull null]) {
             
-            NSError*twitterError=responsedArray[1];
+            __block NSError*twitterError=responsedArray[1];
             
-            /*dispatch_async(mainQueue, ^{
+            dispatch_async(mainQueue, ^{
                 
-                if ([responsedArray[1]isEqualToString:@"RESPONSED_DATA_IS_NULL"]) {
+                if ([twitterError code]==(102|103)) {
                     
-                    NSLog(@"=====DATA_ERROR=====");
-                    
-                }else if ([responsedArray[1]isEqualToString:@"NOT_ANY_RESPONSED_DATA"]){
-                    
-                    NSLog(@"=====HTTP-RESPONSE_ERRROR=====");
-                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"サーバからの応答がありません。" okButtonTitle:@"OK"];
-                    [alert show];
-                    
-                }else if ([responsedArray[1]isEqualToString:@"ACCOUNT_ERROR"]){
-                    
-                    NSLog(@"=====ACCOUNT_ERROR=====");
-                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"Twitterアカウント" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
+                    //account error
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"Twitterアカウントエラー" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
                     alert.delegate=self;
                     [alert show];
+                
+                }else if ([twitterError code]==101){
                     
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"リクエストエラー" description:@"サーバからの応答がありません。時間を置いてから試してみてください。" okButtonTitle:@"OK"];
+                    [alert show];
+                
+                }else if ([twitterError code]==100){
+                    
+                    SJNotificationViewController*_notificationController = [[SJNotificationViewController alloc] initWithNibName:@"SJNotificationViewController" bundle:nil];
+                    [_notificationController setParentView:self.view];
+                    [_notificationController setNotificationLevel:SJNotificationLevelMessage];
+                    [_notificationController setNotificationPosition:SJNotificationPositionBottom];
+                    [_notificationController setNotificationTitle:@"新しいツイートはありません。"];
+                    [_notificationController show];
+                
                 }else{
-                    
-                    NSLog(@"=====UNKNOWN_ERROR=====");
-                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"予期しないエラーです。" okButtonTitle:@"OK"];
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:[NSString stringWithFormat:@"エラー%ld",twitterError.code] description:twitterError.localizedDescription okButtonTitle:@"OK"];
                     [alert show];
                     
                 }
 
                 
-            });*/
+            });
+            
             timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:YES],@"ERROR", nil];
             NSLog(@"Twitter convert Failured");
             
@@ -273,6 +276,10 @@
                     request.account = twAccount;
                     
                     [request performRequestWithHandler:^(NSData*responseData,NSHTTPURLResponse*urlResponse,NSError*error){
+                        
+                        if (error) {
+                            NSLog(@"%@",error);
+                        }
                         
                         if (urlResponse) {
                             NSError *jsonError;

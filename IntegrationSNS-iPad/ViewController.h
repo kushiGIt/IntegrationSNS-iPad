@@ -12,6 +12,7 @@
 #import "Reachability.h"
 #import "MODropAlertView.h"
 #import "TWMessageBarManager.h"
+#import "SJNotificationViewController.h"
 @interface ViewController : UIViewController<UITableViewDataSource,UITableViewDelegate,UIAlertViewDelegate,MODropAlertViewDelegate>{
     
 }
