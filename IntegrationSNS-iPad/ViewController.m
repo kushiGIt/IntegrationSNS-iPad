@@ -92,25 +92,96 @@
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
         
         gotTwitterTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getTwitterTimeLineNewly]];
-        //gotFacebookTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getFaceBookTimeLine]];
+        gotFacebookTimeLineDic=[[NSDictionary alloc]initWithDictionary:[self getFaceBookTimeLine]];
         
         dispatch_semaphore_signal(seamphone);
         
     });
+    dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
     
-//    NSMutableArray*array=[[NSMutableArray alloc]init];
-//    
-//    [array addObject:[gotTwitterTimeLineDic objectForKey:@"TWITTER_DATA"]];
-//    [array addObject:[gotFacebookTimeLineDic objectForKey:@"FACEBOOK_DATA"]];
-//    
-//    NSSortDescriptor *sortDescNumber;
-//    sortDescNumber = [[NSSortDescriptor alloc] initWithKey:@"POST_DATE" ascending:YES];
-//    
-//    NSArray*sortDescArray=[[NSArray alloc]initWithObjects:sortDescNumber, nil];
-//    
-//    NSArray *sortArray=[array sortedArrayUsingDescriptors:sortDescArray];
-//    
-//    NSLog(@"%@",sortArray);
+    
+    __block NSMutableArray*array=[[NSMutableArray alloc]init];
+    
+    dispatch_semaphore_t wait_Sort=dispatch_semaphore_create(0);
+    dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        if ([[gotFacebookTimeLineDic objectForKey:@"ERROR"]boolValue]==NO) {
+            
+            [array addObjectsFromArray:[gotFacebookTimeLineDic objectForKey:@"FACEBOOK_DATA"]];
+        
+        }else{
+            
+            NSError*facebookError=[gotFacebookTimeLineDic objectForKey:@"ERROR_MESSEGE_CODE"];
+            if (facebookError.code==(100|101)) {
+                
+                [array addObjectsFromArray:[[self getFacebookTimeLineFromLocalNSUserDeafalults]objectForKey:@"FACEBOOK_DATA"]];
+            
+            }
+        
+        }
+        
+        if ([[gotTwitterTimeLineDic objectForKey:@"ERROR"]boolValue]==NO) {
+            
+            [array addObjectsFromArray:[gotTwitterTimeLineDic objectForKey:@"TWITTER_DATA"]];
+        
+        }else{
+            
+            NSError*twitterError=[gotTwitterTimeLineDic objectForKey:@"ERROR_MESSEGE_CODE"];
+            if (twitterError.code==(200|201)) {
+                
+                [array addObjectsFromArray:[[self getTwitterTimeLineFromLocalNSUserDeafalults]objectForKey:@"TWITTER_DATA"]];
+            
+            }
+            
+        }
+        
+        NSSortDescriptor *sortDescNumber;
+        sortDescNumber = [[NSSortDescriptor alloc] initWithKey:@"POST_DATE" ascending:YES];
+        
+        NSArray*sortDescArray=[[NSArray alloc]initWithObjects:sortDescNumber, nil];
+        
+        NSArray *sortArray=[array sortedArrayUsingDescriptors:sortDescArray];
+        
+        [self twitterDataRemove:sortArray.mutableCopy];
+        
+        dispatch_semaphore_signal(wait_Sort);
+    
+    });
+    
+    dispatch_semaphore_wait(wait_Sort, DISPATCH_TIME_FOREVER);
+}
+#pragma mark - data remove
+-(void)twitterDataRemove:(NSMutableArray*)soretedArray{
+    
+    dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
+        
+        if (soretedArray.count<=200) {
+            
+            NSLog(@"=====Remove Results=====");
+            NSLog(@"No need for data erasure.");
+            NSLog(@"==========END==========");
+        
+        }else{
+            
+            NSUInteger arrayIndex=soretedArray.count-1;
+            NSUInteger location=200;
+            NSUInteger length=arrayIndex-location+1;
+            
+            NSRange range=NSMakeRange(location, length);
+            
+            [soretedArray removeObjectsInRange:range];
+            
+            NSDictionary *toSaveDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:NO],@"ERROR",soretedArray,@"TWITTER_DATA",nil];
+            NSData*data=[NSKeyedArchiver archivedDataWithRootObject:toSaveDic];
+            [defaults setObject:data forKey:@"TWITTER_TIME-LINE_DATA"];
+            
+            NSLog(@"=====Remove Results=====");
+            NSLog(@"The size of the data after erasing.==> %ld byte",data.length);
+            NSLog(@"befor=%ld after=%ld",arrayIndex+1,soretedArray.count);
+            NSLog(@"==========END==========");
+            
+        }
+    });
 }
 #pragma mark - Get Twitter timeline
 -(NSDictionary*)getTwitterTimeLineFromLocalNSUserDeafalults{
@@ -152,6 +223,7 @@
                     
                     SJNotificationViewController*_notificationController = [[SJNotificationViewController alloc] initWithNibName:@"SJNotificationViewController" bundle:nil];
                     [_notificationController setParentView:self.view];
+                    [_notificationController setTapTarget:self selector:nil];                   
                     [_notificationController setNotificationLevel:SJNotificationLevelMessage];
                     [_notificationController setNotificationPosition:SJNotificationPositionBottom];
                     [_notificationController setNotificationTitle:@"新しいツイートはありません。"];
@@ -166,7 +238,7 @@
                 
             });
             
-            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:YES],@"ERROR", nil];
+            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:YES],@"ERROR",twitterError,@"ERROR_MESSEGE_CODE",nil];
             NSLog(@"Twitter convert Failured");
             
             dispatch_semaphore_signal(seamphone);
@@ -497,7 +569,7 @@
     
     __block NSMutableArray*newsfeed=[[NSMutableArray alloc]init];
     __block NSDictionary*timelineDic;
-    //__block MODropAlertView *alert;
+    __block MODropAlertView *alert;
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
@@ -506,37 +578,37 @@
         
         if (newsfeed[0]==[NSNull null]) {
             
-            /*dispatch_queue_t mainQueue = dispatch_get_main_queue();
-            dispatch_async(mainQueue, ^{
+            NSError*facebookError=[newsfeed objectAtIndex:1];
+            
+            if ([facebookError code]==(202|203)) {
                 
-                if ([newsfeed[1]isEqualToString:@"RESPONSED_DATA_IS_NULL"]) {
-                    
-                    NSLog(@"=====DATA_ERROR=====");
-                    
-                }else if ([newsfeed[1]isEqualToString:@"NOT_ANY_RESPONSED_DATA"]){
-                    
-                    NSLog(@"=====HTTP-RESPONSE_ERRROR=====");
-                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"Facebookのサーバにアクセスしましたが応答がありませんでした。時間が経ってから、もう一度アクセスしてください。" okButtonTitle:@"OK"];
-                    [alert show];
-                    
-                }else if ([newsfeed[1]isEqualToString:@"ACCOUNT_ERROR"]){
-                    
-                    NSLog(@"=====ACCOUNT_ERROR=====");
-                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"Facebookアカウント" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
-                    alert.delegate=self;
-                    [alert show];
-                    
-                }else{
-                    
-                    NSLog(@"=====UNKNOWN_ERROR=====");
-                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"エラー" description:@"予期しないエラーです。時間を置いてからリトライしてみてください。" okButtonTitle:@"OK"];
-                    [alert show];
-                    
-                }
+                //account error
+                alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"Facebookアカウントエラー" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
+                alert.delegate=self;
+                [alert show];
+                
+            }else if ([facebookError code]==201){
+                
+                alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"リクエストエラー" description:@"サーバからの応答がありません。時間を置いてから試してみてください。" okButtonTitle:@"OK"];
+                [alert show];
+                
+            }else if ([facebookError code]==200){
+                
+                SJNotificationViewController*_notificationController = [[SJNotificationViewController alloc] initWithNibName:@"SJNotificationViewController" bundle:nil];
+                [_notificationController setParentView:self.view];
+                [_notificationController setTapTarget:self selector:nil];
+                [_notificationController setNotificationLevel:SJNotificationLevelMessage];
+                [_notificationController setNotificationPosition:SJNotificationPositionBottom];
+                [_notificationController setNotificationTitle:@"新しい投稿はありません。"];
+                [_notificationController show];
+                
+            }else{
+                alert=[[MODropAlertView alloc]initDropAlertWithTitle:[NSString stringWithFormat:@"エラー%ld",facebookError.code] description:facebookError.localizedDescription okButtonTitle:@"OK"];
+                [alert show];
+                
+            }
             
-            });*/
-            
-            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:YES],@"ERROR", nil];
+            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:YES],@"ERROR",facebookError,@"ERROR_MESSEGE_CODE", nil];
             
             dispatch_semaphore_signal(seamphone);
             
