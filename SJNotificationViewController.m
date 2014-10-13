@@ -214,6 +214,7 @@
         NSTimer *notificationTimer;
         notificationTimer = [NSTimer scheduledTimerWithTimeInterval:seconds target:self
                                                            selector:@selector(notificationTimerHide) userInfo:nil repeats:NO];
+        [notificationTimer fire];
         [self show];
     }
     else
