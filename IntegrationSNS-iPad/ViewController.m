@@ -14,6 +14,8 @@
 @interface ViewController (){
     IBOutlet UITableView*mytableview;
     NSUserDefaults*defaults;
+    NSArray*timelineArray__TABLE__;
+    NSMutableDictionary*userImageData__TABLE__;
 }
 
 @end
@@ -86,9 +88,94 @@
 -(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath{
     NSLog(@"display cell..");
 }*/
--(void)prepareforTableviewReloadData:(NSArray*)timelineArray facebookProfileImage:(NSMutableDictionary*)facebookProfileImageDic twitterProfileImage:(NSMutableDictionary*)twitterProfileImageDic{
+-(void)prepareForReloadTableViewDataForGetNewlyFromServer:(NSArray*)timelineArray facebookProfileImage:(NSMutableDictionary*)facebookProfileImageDic twitterProfileImage:(NSMutableDictionary*)twitterProfileImageDic reloadData:(Boolean)isReload{
     
-
+    NSLog(@"*****PREPARE_RELOAD-DATA_GET_FROM_SERVER*****");
+    
+    switch (isReload) {
+        case true:{
+            
+            dispatch_semaphore_t semaphone =dispatch_semaphore_create(0);
+            dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+                
+                dispatch_semaphore_signal(semaphone);
+                
+                
+                NSLog(@"Start reload tableview....YES");
+                
+                //Set timeline
+                timelineArray__TABLE__=[[NSArray alloc]initWithArray:timelineArray];
+                
+                //Set user image
+                userImageData__TABLE__=[[NSMutableDictionary alloc]init];
+                [userImageData__TABLE__ addEntriesFromDictionary:facebookProfileImageDic];
+                [userImageData__TABLE__ addEntriesFromDictionary:twitterProfileImageDic];
+                
+            });
+            
+            dispatch_semaphore_wait(semaphone, DISPATCH_TIME_FOREVER);
+            
+            
+            dispatch_queue_t mainQueue = dispatch_get_main_queue();
+            dispatch_async(mainQueue, ^{
+                
+                [mytableview reloadData];
+                
+            });
+            
+            break;
+            
+        }case false:{
+            
+            NSLog(@"Start reload tableview....NO");
+            
+            break;
+        }}
+    
+}
+-(void)prepareForReloadTableViewDataForGetFromNSUserDefaults:(NSArray*)timelineArray facebookProfileImage:(NSMutableDictionary*)facebookProfileImageDic twitterProfileImage:(NSMutableDictionary*)twitterProfileImageDic reloadData:(Boolean)isReload{
+    
+    NSLog(@"*****PREPARE_RELOAD-DATA_GET_FROM_NSUERDEFAULTS*****");
+    
+    switch (isReload) {
+        case true:{
+            
+            dispatch_semaphore_t semaphone =dispatch_semaphore_create(0);
+            dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+                
+                dispatch_semaphore_signal(semaphone);
+                
+                
+                NSLog(@"Start reload tableview....YES");
+                
+                //Set timeline
+                timelineArray__TABLE__=[[NSArray alloc]initWithArray:timelineArray];
+                
+                //Set user image
+                userImageData__TABLE__=[[NSMutableDictionary alloc]init];
+                [userImageData__TABLE__ addEntriesFromDictionary:facebookProfileImageDic];
+                [userImageData__TABLE__ addEntriesFromDictionary:twitterProfileImageDic];
+                
+            });
+            
+            dispatch_semaphore_wait(semaphone, DISPATCH_TIME_FOREVER);
+            
+            
+            dispatch_queue_t mainQueue = dispatch_get_main_queue();
+            dispatch_async(mainQueue, ^{
+                
+                [mytableview reloadData];
+                
+            });
+            
+            break;
+            
+        }case false:{
+            
+            NSLog(@"Start reload tableview....NO");
+            
+            break;
+        }}
 }
 #pragma mark - get timeline
 -(void)getTwitterAndFacebookTimeLine{
@@ -174,7 +261,7 @@
         dispatch_semaphore_signal(wait_Sort);
         
         //reload data
-        [self prepareforTableviewReloadData:twitterAndFacebookSortedArray facebookProfileImage:facebookProfileImageDic twitterProfileImage:twitterProfileImageDic];
+        [self prepareForReloadTableViewDataForGetNewlyFromServer:twitterAndFacebookSortedArray facebookProfileImage:facebookProfileImageDic twitterProfileImage:twitterProfileImageDic reloadData:true];
     
     });
     
