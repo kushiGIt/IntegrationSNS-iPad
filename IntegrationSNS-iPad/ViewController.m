@@ -102,7 +102,8 @@
        
         userImage=[[UIImageView alloc]initWithImage:[userImageData__TABLE__ objectForKey:[timelineDic objectForKey:@"USER_ID"]]];
         userNameTextView.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"USER_NAME"]];
-        //created_time.text=[timelineDic objectForKey:@"POST_DATE"];
+        NSString*dateStr=[self dateToString:[timelineDic objectForKey:@"POST_DATE"] formatString:@"yyyy-MM-dd"];
+        created_time.text=dateStr;
         userTextData.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"TEXT"]];
         [imageData addGestureRecognizer:tapGesture];
     
@@ -110,7 +111,8 @@
         
         userImage=[[UIImageView alloc]initWithImage:[userImageData__TABLE__ objectForKey:[timelineDic objectForKey:@"USER_ICON"]]];
         userNameTextView.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"USER_NAME"]];
-        //created_time.text=[timelineDic objectForKey:@"POST_DATE"];
+        NSString*dateStr=[self dateToString:[timelineDic objectForKey:@"POST_DATE"] formatString:@"yyyy-MM-dd"];
+        created_time.text=dateStr;
         userTextData.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"TEXT"]];
         [imageData addGestureRecognizer:tapGesture];
     
@@ -122,7 +124,16 @@
     
     return cell;
 }
-
+#pragma mark - convert date to string
+-(NSString*)dateToString:(NSDate *)baseDate formatString:(NSString *)formatString
+{
+    NSDateFormatter *inputDateFormatter = [[NSDateFormatter alloc] init];
+    
+    [inputDateFormatter setLocale:[NSLocale currentLocale]];
+    [inputDateFormatter setDateFormat:formatString];
+    NSString *str = [inputDateFormatter stringFromDate:baseDate];
+    return str;
+}
 #pragma mark - prepare reload tableview data
 -(void)prepareForReloadTableViewDataForGetNewlyFromServer:(NSArray*)timelineArray facebookProfileImage:(NSMutableDictionary*)facebookProfileImageDic twitterProfileImage:(NSMutableDictionary*)twitterProfileImageDic reloadData:(Boolean)isReload{
     
@@ -1195,6 +1206,7 @@
         }
         
         [timelineArray removeObjectsAtIndexes:duplicateIndex];
+        NSLog(@"deleted index=%@",duplicateIndex);
         [timelineMutableDic setObject:timelineArray forKey:@"FACEBOOK_DATA"];
         
         dispatch_semaphore_signal(wait_createNSSet);

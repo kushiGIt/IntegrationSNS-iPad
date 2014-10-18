@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "IntegrationSNS-iPad/ViewController.m"
-            timestampString = "435327800.475287"
+            timestampString = "435335034.677539"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "219"
-            endingLineNumber = "219"
+            startingLineNumber = "230"
+            endingLineNumber = "230"
             landmarkName = "-getTwitterAndFacebookTimeLine"
             landmarkType = "5">
          </BreakpointContent>
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "IntegrationSNS-iPad/ViewController.m"
-            timestampString = "435327810.451095"
+            timestampString = "435335034.677539"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "240"
-            endingLineNumber = "240"
+            startingLineNumber = "251"
+            endingLineNumber = "251"
             landmarkName = "-getTwitterAndFacebookTimeLine"
             landmarkType = "5">
          </BreakpointContent>
