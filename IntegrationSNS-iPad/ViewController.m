@@ -7,15 +7,18 @@
 //
 
 #import "ViewController.h"
-#define TIME_LANE_TABLEVIEW_TEXTVIEW_VIEWTAG 1
-#define TIME_LINE_TABLEVIEW_IMAGEVIEW_VIEWTAG 2
-#define TIME_LINE_TABLEVIEW_LABEL_VIEWTAG 3
+#define USER_IMAGE_VIEW_TAG 1
+#define USER_NAME_VIEW_TAG 2
+#define CREATED_TIME_LABEL_TAG 3
+#define USER_TEXT_DATA 4
+#define IMAGE_VIEW_TAG 5
 
 @interface ViewController (){
     IBOutlet UITableView*mytableview;
     NSUserDefaults*defaults;
     NSArray*timelineArray__TABLE__;
     NSMutableDictionary*userImageData__TABLE__;
+    UITapGestureRecognizer *tapGesture;
 }
 
 @end
@@ -26,18 +29,19 @@
     [super viewDidLoad];
     //Set UserDefaults
     defaults=[NSUserDefaults standardUserDefaults];
+    
+    tapGesture =[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(view_Tapped)];
+    
+    mytableview.delegate=self;
+    mytableview.dataSource=self;
+    NSLog(@"%@",mytableview.delegate);
+    NSLog(@"%@",mytableview.dataSource);
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-    
-#warning TEST_CODE
-    /*TEST_CODE*/
-    /*TEST_CODE*/
     NSString *appDomain = [[NSBundle mainBundle] bundleIdentifier];
     [[NSUserDefaults standardUserDefaults] removePersistentDomainForName:appDomain];
-    /*TEST_CODE*/
-    /*TEST_CODE*/
 }
 -(void)viewDidAppear:(BOOL)animated{//recive from server
     [super viewDidAppear:YES];
@@ -62,32 +66,64 @@
         
     }
 }
+
+#pragma mark - UITapGestureRecognizer methods
+-(void)view_Tapped{
+    NSLog(@"Tapped");
+}
+
+
 #pragma mark - TableView methods
-/*- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
+    
     return 1;
+
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    
-    return timelineData.count;
+    NSLog(@"timeline.count=%lu",(unsigned long)timelineArray__TABLE__.count);
+    return timelineArray__TABLE__.count;
+
 }
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    UITableViewCell *cell=[mytableview dequeueReusableCellWithIdentifier:@"Cell_type=TWITTER"];
     
-//    UITextView*textView=(UITextView*)[cell viewWithTag:TIME_LANE_TABLEVIEW_TEXTVIEW_VIEWTAG];
-//    textView.text=[NSString stringWithFormat:@"%@",textArray[indexPath.row]];
-//    
-//    UIImageView*imageView=(UIImageView*)[cell viewWithTag:TIME_LINE_TABLEVIEW_IMAGEVIEW_VIEWTAG];
-//    imageView.image=[imageDictionary objectForKey:iconArray[indexPath.row]];
-//    
-//    UILabel*label=(UILabel*)[cell viewWithTag:TIME_LINE_TABLEVIEW_LABEL_VIEWTAG];
-//    label.text=[NSString stringWithFormat:@"%@",dateArray[indexPath.row]];
+    UITableViewCell *cell=[mytableview dequeueReusableCellWithIdentifier:@"MyCell"];
+    
+    UIImageView*userImage=(UIImageView*)[cell viewWithTag:USER_IMAGE_VIEW_TAG];
+    UILabel*userNameTextView=(UILabel*)[cell viewWithTag:USER_NAME_VIEW_TAG];
+    UILabel*created_time=(UILabel*)[cell viewWithTag:CREATED_TIME_LABEL_TAG];
+    UITextView*userTextData=(UITextView*)[cell viewWithTag:USER_TEXT_DATA];
+    UIImageView*imageData=(UIImageView*)[cell viewWithTag:IMAGE_VIEW_TAG];
+    
+    NSDictionary*timelineDic=[[NSDictionary alloc]initWithDictionary:[timelineArray__TABLE__ objectAtIndex:indexPath.row]];
+    
+    
+    if ([[timelineDic objectForKey:@"TYPE"]isEqualToString:@"FACEBOOK"]) {
+       
+        userImage=[[UIImageView alloc]initWithImage:[userImageData__TABLE__ objectForKey:[timelineDic objectForKey:@"USER_ID"]]];
+        userNameTextView.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"USER_NAME"]];
+        //created_time.text=[timelineDic objectForKey:@"POST_DATE"];
+        userTextData.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"TEXT"]];
+        [imageData addGestureRecognizer:tapGesture];
+    
+    }else if ([[timelineDic objectForKey:@"TYPE"]isEqualToString:@"TWITTER"]){
+        
+        userImage=[[UIImageView alloc]initWithImage:[userImageData__TABLE__ objectForKey:[timelineDic objectForKey:@"USER_ICON"]]];
+        userNameTextView.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"USER_NAME"]];
+        //created_time.text=[timelineDic objectForKey:@"POST_DATE"];
+        userTextData.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"TEXT"]];
+        [imageData addGestureRecognizer:tapGesture];
+    
+    }else{
+        
+        NSLog(@"Not found this type...%@",[timelineDic valueForKey:@"TYPE"]);
+    
+    }
     
     return cell;
 }
--(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath{
-    NSLog(@"display cell..");
-}*/
+
+#pragma mark - prepare reload tableview data
 -(void)prepareForReloadTableViewDataForGetNewlyFromServer:(NSArray*)timelineArray facebookProfileImage:(NSMutableDictionary*)facebookProfileImageDic twitterProfileImage:(NSMutableDictionary*)twitterProfileImageDic reloadData:(Boolean)isReload{
     
     NSLog(@"*****PREPARE_RELOAD-DATA_GET_FROM_SERVER*****");
@@ -115,13 +151,8 @@
             
             dispatch_semaphore_wait(semaphone, DISPATCH_TIME_FOREVER);
             
-            
-            dispatch_queue_t mainQueue = dispatch_get_main_queue();
-            dispatch_async(mainQueue, ^{
-                
-                [mytableview reloadData];
-                
-            });
+            NSLog(@"Reload....");
+            [mytableview reloadData];
             
             break;
             
@@ -133,6 +164,7 @@
         }}
     
 }
+
 -(void)prepareForReloadTableViewDataForGetFromNSUserDefaults:(NSArray*)timelineArray facebookProfileImage:(NSMutableDictionary*)facebookProfileImageDic twitterProfileImage:(NSMutableDictionary*)twitterProfileImageDic reloadData:(Boolean)isReload{
     
     NSLog(@"*****PREPARE_RELOAD-DATA_GET_FROM_NSUERDEFAULTS*****");
@@ -177,7 +209,9 @@
             break;
         }}
 }
+
 #pragma mark - get timeline
+
 -(void)getTwitterAndFacebookTimeLine{
     
     __block NSDictionary*gotFacebookTimeLineDic;
@@ -210,7 +244,7 @@
         }else{
             
             NSError*facebookError=[gotFacebookTimeLineDic objectForKey:@"ERROR_MESSEGE_CODE"];
-            if (facebookError.code==(100|101)) {
+            if (facebookError.code==(200|201)) {
                 
                 [facebookArray addObjectsFromArray:[[self getFacebookTimeLineFromLocalNSUserDeafalults]objectForKey:@"FACEBOOK_DATA"]];
             
@@ -227,7 +261,8 @@
         }else{
             
             NSError*twitterError=[gotTwitterTimeLineDic objectForKey:@"ERROR_MESSEGE_CODE"];
-            if (twitterError.code==(200|201)) {
+            
+            if (twitterError.code==(100|101)) {
                 
                 [twitterArray addObjectsFromArray:[[self getTwitterTimeLineFromLocalNSUserDeafalults]objectForKey:@"TWITTER_DATA"]];
             
@@ -267,7 +302,9 @@
     
     dispatch_semaphore_wait(wait_Sort, DISPATCH_TIME_FOREVER);
 }
+
 #pragma mark - data remove
+
 -(NSMutableArray*)twitterDataRemove:(NSMutableArray*)soretedArray{
     
     
@@ -296,8 +333,8 @@
             [defaults setObject:data forKey:@"TWITTER_TIME-LINE_DATA"];
             [defaults synchronize];
             
-            NSLog(@"The size of the data after erasing.==> %ld byte",data.length);
-            NSLog(@"befor=%ld after=%ld",arrayIndex+1,soretedArray.count);
+            NSLog(@"The size of the data after erasing.==> %ld byte",(unsigned long)data.length);
+            NSLog(@"befor=%lu after=%ld",arrayIndex+1,(unsigned long)soretedArray.count);
             
         }
         
@@ -311,10 +348,12 @@
     
     return soretedArray;
 }
+
 #pragma mark - Get Twitter timeline
+
 -(NSDictionary*)getTwitterTimeLineFromLocalNSUserDeafalults{
     NSData*defalultsData=[NSData dataWithData:[defaults dataForKey:@"TWITTER_TIME-LINE_DATA"]];
-    NSLog(@"Got twitter timeline data from NSUserDeafaults. Byte=%ldbyte",defalultsData.length);
+    NSLog(@"Got twitter timeline data from NSUserDeafaults. Byte=%ldbyte",(unsigned long)defalultsData.length);
     NSDictionary*defaultsDic=[NSKeyedUnarchiver unarchiveObjectWithData:defalultsData];
     return defaultsDic;
 }
@@ -364,7 +403,7 @@
                     [_notificationController showFor:5];
                 
                 }else{
-                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:[NSString stringWithFormat:@"エラー%ld",twitterError.code] description:twitterError.localizedDescription okButtonTitle:@"OK"];
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:[NSString stringWithFormat:@"エラー%ld",(long)twitterError.code] description:twitterError.localizedDescription okButtonTitle:@"OK"];
                     [alert show];
                     
                 }
@@ -380,8 +419,6 @@
         }else{
             
             NSMutableArray*array=[[NSMutableArray alloc]initWithArray:[[self getTwitterTimeLineFromLocalNSUserDeafalults]objectForKey:@"TWITTER_DATA"]];
-            
-            NSLog(@"timeline=%@",responsedArray);
 
             dispatch_semaphore_t convertWait=dispatch_semaphore_create(0);
             dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
@@ -391,11 +428,11 @@
                     NSMutableDictionary*dic=[[NSMutableDictionary alloc]init];
                     
                     NSString*twitterTextStr=[NSString stringWithFormat:@"%@",[tweet objectForKey:@"text"]];
-                    [dic setObject:twitterTextStr forKey:@"TWITTER_TEXT"];
+                    [dic setObject:twitterTextStr forKey:@"TEXT"];
                     
                     NSDictionary *user = tweet[@"user"];
-                    [dic setObject:user[@"screen_name"] forKey:@"TWITTER_USER_NAME"];
-                    [dic setObject:user[@"profile_image_url"] forKey:@"TWITTER_USER_ICON"];
+                    [dic setObject:user[@"screen_name"] forKey:@"USER_NAME"];
+                    [dic setObject:user[@"profile_image_url"] forKey:@"USER_ICON"];
                     
                     //TwiietrDate→NSDate Convert
                     NSDateFormatter* inFormat = [[NSDateFormatter alloc] init];
@@ -430,7 +467,7 @@
             
             timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:NO],@"ERROR",array,@"TWITTER_DATA",nil];
             NSData*data=[NSKeyedArchiver archivedDataWithRootObject:timelineDic];
-            NSLog(@"App is going to save data. Byte=%ldbyte.",data.length);
+            NSLog(@"App is going to save data. Byte=%ldbyte.",(unsigned long)data.length);
             [defaults setObject:data forKey:@"TWITTER_TIME-LINE_DATA"];
             [defaults synchronize];
             
@@ -447,6 +484,7 @@
     
     return timelineDic;
 }
+
 -(NSMutableArray*)getTwitterTimeLineNewlyFromServer{
     
     NSLog(@"Start get twitter timeline from server.");
@@ -618,12 +656,20 @@
     return timeLineArray;
     
 }
+
 #pragma mark get user profile image and convert
+
 -(NSMutableDictionary*)getTwitterProfileImage:(NSArray*)timeLineArray{
     
     NSLog(@"=====GET_TWITTER_USER-PROFILE_IMEGE_RESULTS=====");
     __block NSMutableDictionary*convertedUserImageDic=[[NSMutableDictionary alloc]init];
     __block NSMutableDictionary*userImageDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"USER_PROFILE-IMAGE_URL_AND_DATA__TWITTER"]];
+    
+    if ([defaults dictionaryForKey:@"USER_PROFILE-IMAGE_URL_AND_DATA__TWITTER"]) {
+        
+    }else{
+        
+    }
     
     //Get data from URL
     dispatch_semaphore_t seamphone_GetDataWait_=dispatch_semaphore_create(0);
@@ -636,7 +682,7 @@
             
             for (NSDictionary*dic in timeLineArray) {
                 
-                [iconURL_Array addObject:[dic objectForKey:@"TWITTER_USER_ICON"]];
+                [iconURL_Array addObject:[dic objectForKey:@"USER_ICON"]];
                 
             }
             
@@ -645,7 +691,7 @@
                 if ([userImageDic objectForKey:imageURL]==nil) {
                     
                     NSData*imageData=[NSData dataWithContentsOfURL:[NSURL URLWithString:imageURL]];
-                    NSLog(@"Get twitter profile image data. Data size is %ld",imageData.length);
+                    NSLog(@"Get twitter user profile image data. Data size is %ld",(unsigned long)imageData.length);
                     [userImageDic setObject:imageData forKey:imageURL];
                     
                 }else{
@@ -677,6 +723,7 @@
     
     return convertedUserImageDic;
 }
+
 -(NSMutableDictionary*)convert_NSData_to_UIImage__TWITTER:(NSMutableDictionary*)userImageDic{
     
     __block NSMutableDictionary*imageDictionary=[[NSMutableDictionary alloc]init];
@@ -699,7 +746,9 @@
     dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
     return imageDictionary;
 }
+
 #pragma mark - Get facebook timeline
+
 -(NSDictionary*)getFacebookTimeLineFromLocalNSUserDeafalults{
     
     __block NSDictionary*defaultsDic;
@@ -708,7 +757,7 @@
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
         
         NSData*defalultsData=[NSData dataWithData:[defaults dataForKey:@"FACEBOOK_TIME-LINE_DATA"]];
-        NSLog(@"Got facebook timeline data from NSUserDeafaults. Byte=%ldbyte",defalultsData.length);
+        NSLog(@"Got facebook timeline data from NSUserDeafaults. Byte=%ldbyte",(unsigned long)defalultsData.length);
         defaultsDic=[NSKeyedUnarchiver unarchiveObjectWithData:defalultsData];
         
         dispatch_semaphore_signal(seamphone);
@@ -767,7 +816,7 @@
                     [_notificationController show];
                     
                 }else{
-                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:[NSString stringWithFormat:@"エラー%ld",facebookError.code] description:facebookError.localizedDescription okButtonTitle:@"OK"];
+                    alert=[[MODropAlertView alloc]initDropAlertWithTitle:[NSString stringWithFormat:@"エラー%ld",(long)facebookError.code] description:facebookError.localizedDescription okButtonTitle:@"OK"];
                     [alert show];
                     
                 }
@@ -784,19 +833,18 @@
             
             NSMutableArray*array=[[NSMutableArray alloc]initWithArray:[[self getFacebookTimeLineFromLocalNSUserDeafalults] objectForKey:@"FACEBOOK_DATA"]];
             
-            NSLog(@"newsfeed=%@",newsfeed[2]);
             
             for (int i=0; i<[newsfeed count]-1;i++) {
                 
                 NSMutableDictionary*dic=[[NSMutableDictionary alloc]init];
                 
                 //user name
-                [dic setObject:[[newsfeed valueForKey:@"from"]valueForKey:@"name"][i] forKey:@"FACEBOOK_USER_NAME"];
+                [dic setObject:[[newsfeed valueForKey:@"from"]valueForKey:@"name"][i] forKey:@"USER_NAME"];
                 //user id
-                [dic setObject:[[newsfeed valueForKey:@"from"]valueForKey:@"id"][i] forKey:@"FACEBOOK_USER_ID"];
+                [dic setObject:[[newsfeed valueForKey:@"from"]valueForKey:@"id"][i] forKey:@"USER_ID"];
                 
                 //text data
-                [dic setObject:[newsfeed valueForKey:@"message"][i] forKey:@"FACEBOOK_TEXT"];
+                [dic setObject:[newsfeed valueForKey:@"message"][i] forKey:@"TEXT"];
                 
                 //date data
                 NSString*Original_ISO_8601_Date=[NSString stringWithFormat:@"%@",[newsfeed valueForKey:@"created_time"][i]];
@@ -809,22 +857,22 @@
                 //like data
                 if ([[[[newsfeed valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i] isEqual:[NSNull null]]==YES) {
                     
-                    [dic setObject:@"NOT_ANY_LIKE" forKey:@"FACEBOOK_LIKE_DATA"];
+                    [dic setObject:@"NOT_ANY_LIKE" forKey:@"LIKE_DATA"];
                     
                 }else{
                     
-                    [dic setObject:[[[newsfeed valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i] forKey:@"FACEBOOK_LIKE_DATA"];
+                    [dic setObject:[[[newsfeed valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i] forKey:@"LIKE_DATA"];
                     
                 }
                 
                 //newsfeed picture
                 if ([[newsfeed valueForKey:@"picture"]isEqual:[NSNull null]]==YES) {
                     
-                    [dic setObject:@"NOT_ANY_PICTURE" forKey:@"FACEBOOK_PICTURE_DATA"];
+                    [dic setObject:@"NOT_ANY_PICTURE" forKey:@"PICTURE_DATA"];
                 
                 }else{
                     
-                    [dic setObject:[newsfeed valueForKey:@"picture"] forKey:@"FACEBOOK_PICTURE_DATA"];
+                    [dic setObject:[newsfeed valueForKey:@"picture"] forKey:@"PICTURE_DATA"];
                     
                 }
                 
@@ -840,7 +888,7 @@
             
             NSData*data=[NSKeyedArchiver archivedDataWithRootObject:[self searchDuplicationFacebookObject:timelineDic]];
             
-            NSLog(@"App is going to save data. Byte=%ldbyte.",data.length);
+            NSLog(@"App is going to save data. Byte=%ldbyte.",(unsigned long)data.length);
             
             [defaults setObject:data forKey:@"FACEBOOK_TIME-LINE_DATA"];
             [defaults synchronize];
@@ -1019,11 +1067,14 @@
     return timeLineArray;
     
 }
-#pragma mark - get facebook user icon and convert
+
+#pragma mark get facebook user icon and convert
+
 -(NSMutableDictionary*)getfacebookProfileImage:(NSArray*)timeLineArray{
     
     NSLog(@"=====GET_FACEBOOK_USER-PROFILE_IMEGE_RESULTS=====");
     __block NSMutableDictionary*convertedUserImageDic=[[NSMutableDictionary alloc]init];
+    
     __block NSMutableDictionary*userImageDic=[[NSMutableDictionary alloc]initWithDictionary:[defaults dictionaryForKey:@"USER_PROFILE-IMAGE_URL_AND_DATA__FACEBOOK"]];
     
     //Get data from URL
@@ -1037,7 +1088,7 @@
             
             for (NSDictionary*dic in timeLineArray) {
                 
-                [iconURL_Array addObject:[dic objectForKey:@"FACEBOOK_USER_ID"]];
+                [iconURL_Array addObject:[dic objectForKey:@"USER_ID"]];
                 
             }
             
@@ -1046,8 +1097,16 @@
                 if ([userImageDic objectForKey:user_id]==nil) {
                     
                     NSData*imageData=[NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://graph.facebook.com/%@/picture",user_id]]];
-                    NSLog(@"Get facebook user profile image data. Data size is %ld",imageData.length);
-                    [userImageDic setObject:imageData forKey:user_id];
+                    NSLog(@"Get facebook user profile image data. Data size is %ld",(unsigned long)imageData.length);
+                    if (imageData.length==0) {
+                        
+                        NSLog(@"This image data id is incorrect....%@",user_id);
+                    
+                    }else{
+                        
+                        [userImageDic setObject:imageData forKey:user_id];
+                        
+                    }
                     
                 }else{
                     
@@ -1078,6 +1137,7 @@
     
     return convertedUserImageDic;
 }
+
 -(NSMutableDictionary*)convert_NSData_to_UIImage__FACEBOOK:(NSMutableDictionary*)userImageDic{
     
     __block NSMutableDictionary*imageDictionary=[[NSMutableDictionary alloc]init];
@@ -1117,7 +1177,7 @@
         
         for (NSMutableDictionary*dic in timelineArray) {
             
-            [dic removeObjectForKey:@"FACEBOOK_LIKE_DATA"];
+            [dic removeObjectForKey:@"LIKE_DATA"];
             [set addObject:dic];
             
             index++;
@@ -1145,6 +1205,7 @@
     
     return timelineMutableDic.copy;
 }
+
 #pragma mark - UIAlertViewDelegate
 -(void)alertViewPressButton:(MODropAlertView *)alertView buttonType:(DropAlertButtonType)buttonType{
     NSLog(@"%s",__func__);
@@ -1163,21 +1224,7 @@
             break;
             
     }
+
 }
-/*
- dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
- dispatch_async(queue, ^{
- 
- });
- 
- dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
- dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0),^{
- dispatch_semaphore_signal(seamphone);
- });
- dispatch_semaphore_wait(seamphone, DISPATCH_TIME_FOREVER);
- 
- dispatch_queue_t mainQueue = dispatch_get_main_queue();
- dispatch_async(mainQueue, ^{
-  });
- */
+
 @end
