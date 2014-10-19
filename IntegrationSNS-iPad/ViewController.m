@@ -16,7 +16,6 @@
 @interface ViewController (){
     IBOutlet UITableView*mytableview;
     NSUserDefaults*defaults;
-    NSCache*imageCache;
     NSArray*timelineArray__TABLE__;
     NSMutableDictionary*userImageData__TABLE__;
     UITapGestureRecognizer *tapGesture;
@@ -112,6 +111,10 @@
         
         userTextData.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"TEXT"]];
         
+        NSMutableDictionary*facebookNewsfeedImage=[[NSMutableDictionary alloc]initWithDictionary:[self getFacebookNewsFeedPicture_withImageDic:timelineDic]];
+        NSString*urlKeyStr=[NSString stringWithFormat:@"%@",[[timelineDic objectForKey:@"PICTURE_DATA"]firstObject]];
+        UIImage*facebookNewsFeedImageFromNSData=[[UIImage alloc]initWithData:[facebookNewsfeedImage objectForKey:urlKeyStr]];
+        imageData.image=facebookNewsFeedImageFromNSData;//test
         [imageData addGestureRecognizer:tapGesture];
     
     }else if ([[timelineDic objectForKey:@"TYPE"]isEqualToString:@"TWITTER"]){
@@ -126,6 +129,7 @@
         
         userTextData.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"TEXT"]];
         
+        imageData.image=[UIImage imageNamed:@"icon-success"];//test
         [imageData addGestureRecognizer:tapGesture];
     
     }else{
@@ -429,19 +433,19 @@
             
             dispatch_async(mainQueue, ^{
                 
-                if ([twitterError code]==(102|103)) {
+                if (twitterError.code==102 || twitterError.code==103) {
                     
                     //account error
                     alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"Twitterアカウントエラー" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
                     alert.delegate=self;
                     [alert show];
                 
-                }else if ([twitterError code]==101){
+                }else if (twitterError.code==101){
                     
                     alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"リクエストエラー" description:@"サーバからの応答がありません。時間を置いてから試してみてください。" okButtonTitle:@"OK"];
                     [alert show];
                 
-                }else if ([twitterError code]==100){
+                }else if (twitterError.code==100){
                     
                     SJNotificationViewController*_notificationController = [[SJNotificationViewController alloc] initWithNibName:@"SJNotificationViewController" bundle:nil];
                     [_notificationController setParentView:self.view];
@@ -846,19 +850,19 @@
             dispatch_queue_t mainQueue = dispatch_get_main_queue();
             dispatch_async(mainQueue, ^{
                 
-                if ([facebookError code]==(202|203)) {
+                if (facebookError.code==202 || facebookError.code==203) {
                     
                     //account error
                     alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"Facebookアカウントエラー" description:@"アカウントに問題があるようです。今すぐ設定を確認しますか？" okButtonTitle:@"はい" cancelButtonTitle:@"いいえ"];
                     alert.delegate=self;
                     [alert show];
                     
-                }else if ([facebookError code]==201){
+                }else if (facebookError.code==201){
                     
                     alert=[[MODropAlertView alloc]initDropAlertWithTitle:@"リクエストエラー" description:@"サーバからの応答がありません。時間を置いてから試してみてください。" okButtonTitle:@"OK"];
                     [alert show];
                     
-                }else if ([facebookError code]==200){
+                }else if (facebookError.code==200){
                     
                     SJNotificationViewController*_notificationController = [[SJNotificationViewController alloc] initWithNibName:@"SJNotificationViewController" bundle:nil];
                     [_notificationController setParentView:self.view];
@@ -906,11 +910,12 @@
                 [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
                 date_converted = [formatter dateFromString:Original_ISO_8601_Date];
                 [dic setObject:date_converted forKey:@"POST_DATE"];
+                NSLog(@"%@",date_converted);
                 
                 //like data
                 if ([[[[newsfeed valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i] isEqual:[NSNull null]]==YES) {
                     
-                    [dic setObject:@"NOT_ANY_LIKE" forKey:@"LIKE_DATA"];
+                    [dic setObject:[NSNull null] forKey:@"LIKE_DATA"];
                     
                 }else{
                     
@@ -921,7 +926,7 @@
                 //newsfeed picture
                 if ([[newsfeed valueForKey:@"picture"]isEqual:[NSNull null]]==YES) {
                     
-                    [dic setObject:@"NOT_ANY_PICTURE" forKey:@"PICTURE_DATA"];
+                    [dic setObject:[NSNull null] forKey:@"PICTURE_DATA"];
                 
                 }else{
                     
@@ -1120,7 +1125,63 @@
     return timeLineArray;
     
 }
-
+#pragma mark get facebook newsfeed picture
+#warning I must verify this code....
+-(NSMutableDictionary*)getFacebookNewsFeedPicture_withImageDic:(NSDictionary*)imageDic{
+    
+    NSLog(@"=====GET_FACEBOOK_NEWSFEED_IMEGE_RESULTS=====");
+    NSCache*imageCache;
+    __block NSMutableDictionary*convertedNewsfeedImage=[[NSMutableDictionary alloc]init];
+    __block NSMutableDictionary*userImageDic=[[NSMutableDictionary alloc]initWithDictionary:[imageCache objectForKey:@"IMAGE_CACHE"]];
+    
+    //Get data from URL
+    dispatch_semaphore_t seamphone_GetDataWait_=dispatch_semaphore_create(0);
+    dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
+        
+        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
+        dispatch_sync(queue, ^{
+            
+            BOOL isNeed=YES;
+            
+            NSArray*iconURL_Array=[[NSArray alloc]initWithArray:[imageDic objectForKey:@"PICTURE_DATA"]];
+            
+            for (NSString*urlStr in iconURL_Array) {
+                
+                if ([userImageDic objectForKey:urlStr]==nil) {
+                    
+                    NSData*imageData=[NSData dataWithContentsOfURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@",urlStr]]];
+                    NSLog(@"Get facebook newsfeed image data. Data size is %ld",(unsigned long)imageData.length);
+                    if (imageData.length==0) {
+                        
+                        NSLog(@"This image data id is incorrect....%@",urlStr);
+                        
+                    }else{
+                        
+                        [userImageDic setObject:imageData forKey:urlStr];
+                        
+                    }
+                    
+                }else{
+                    
+                    isNeed=NO;
+                    
+                }
+            }
+            
+            if (isNeed==NO) {
+                NSLog(@"Not needed to get facebook newsfeed image.");
+            }
+            
+            [imageCache setObject:userImageDic forKey:@"IMAGE_CACHE"];
+            
+            convertedNewsfeedImage=[[NSMutableDictionary alloc]initWithDictionary:[self convert_NSData_to_UIImage__FACEBOOK:userImageDic]];
+            
+            dispatch_semaphore_signal(seamphone_GetDataWait_);
+        });
+    });
+    NSLog(@"======================END=======================");
+    return convertedNewsfeedImage;
+}
 #pragma mark get facebook user icon and convert
 
 -(NSMutableDictionary*)getfacebookProfileImage:(NSArray*)timeLineArray{
