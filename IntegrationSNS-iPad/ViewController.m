@@ -103,7 +103,7 @@
     if ([[timelineDic objectForKey:@"TYPE"]isEqualToString:@"FACEBOOK"]) {
         
         UIImage*profileImage=[userImageData__TABLE__ objectForKey:[timelineDic objectForKey:@"USER_ID"]];
-        userImage=[[UIImageView alloc]initWithImage:profileImage];
+        userImage.image=profileImage;
         
         userNameTextView.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"USER_NAME"]];
         
@@ -117,7 +117,7 @@
     }else if ([[timelineDic objectForKey:@"TYPE"]isEqualToString:@"TWITTER"]){
         
         UIImage*profileImage=[userImageData__TABLE__ objectForKey:[timelineDic objectForKey:@"USER_ICON"]];
-        userImage=[[UIImageView alloc]initWithImage:profileImage];
+        userImage.image=profileImage;
         
         userNameTextView.text=[NSString stringWithFormat:@"%@",[timelineDic objectForKey:@"USER_NAME"]];
         
