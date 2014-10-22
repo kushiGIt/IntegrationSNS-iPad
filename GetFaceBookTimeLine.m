@@ -112,7 +112,6 @@
                 [formatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ssZ"];
                 date_converted = [formatter dateFromString:Original_ISO_8601_Date];
                 [dic setObject:date_converted forKey:@"POST_DATE"];
-                NSLog(@"%@",date_converted);
                 
                 //like data
                 if ([[[[newsfeed valueForKey:@"likes"]valueForKey:@"data"]objectAtIndex:i] isEqual:[NSNull null]]==YES) {
@@ -505,8 +504,6 @@
             [dic removeObjectForKey:@"POST_DATE"];
             [set addObject:dic];
             
-            index++;
-            
             if (setCountForComparison==set.count) {
                 
                 [duplicateIndex addIndex:index];
@@ -517,6 +514,8 @@
                 setCountForComparison=(int)set.count;
                 
             }
+            
+            index++;
             
         }
         
