@@ -42,6 +42,5 @@ typedef enum{
 -(NSMutableDictionary*)convert_NSData_to_UIImage__FACEBOOK:(NSMutableDictionary*)userImageDic;
 -(NSDictionary*)searchDuplicationFacebookObject:(NSDictionary*)timelineDic;
 
-
 @end
 

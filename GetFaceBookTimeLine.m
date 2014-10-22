@@ -20,6 +20,8 @@
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
         
+        defaults=[NSUserDefaults standardUserDefaults];
+        
         NSData*defalultsData=[NSData dataWithData:[defaults dataForKey:@"FACEBOOK_TIME-LINE_DATA"]];
         NSLog(@"Got facebook timeline data from NSUserDeafaults. Byte=%ldbyte",(unsigned long)defalultsData.length);
         defaultsDic=[NSKeyedUnarchiver unarchiveObjectWithData:defalultsData];
@@ -148,6 +150,7 @@
             
             NSLog(@"App is going to save data. Byte=%ldbyte.",(unsigned long)data.length);
             
+            defaults=[NSUserDefaults standardUserDefaults];
             [defaults setObject:data forKey:@"FACEBOOK_TIME-LINE_DATA"];
             [defaults synchronize];
             
@@ -383,6 +386,8 @@
 }
 #pragma mark get facebook user icon and convert
 -(NSMutableDictionary*)getfacebookProfileImage:(NSArray*)timeLineArray{
+    
+    defaults=[NSUserDefaults standardUserDefaults];
     
     NSLog(@"=====GET_FACEBOOK_USER-PROFILE_IMEGE_RESULTS=====");
     __block NSMutableDictionary*convertedUserImageDic=[[NSMutableDictionary alloc]init];
