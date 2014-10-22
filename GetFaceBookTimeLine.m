@@ -13,7 +13,6 @@
     NSUserDefaults*defaults;
 }
 #pragma mark - Get facebook timeline
-
 -(NSDictionary*)getFacebookTimeLineFromLocalNSUserDeafalults{
     
     __block NSDictionary*defaultsDic;
@@ -41,7 +40,6 @@
     
     __block NSMutableArray*newsfeed=[[NSMutableArray alloc]init];
     __block NSDictionary*timelineDic;
-    //__block MODropAlertView *alert;
     
     dispatch_semaphore_t seamphone=dispatch_semaphore_create(0);
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),^{
@@ -50,27 +48,39 @@
         
         if (newsfeed[0]==[NSNull null]) {
             
-            NSLog(@"Stert twitter alert view.");
-            
             NSError*facebookError=[newsfeed objectAtIndex:1];
-            
-            NSArray*errorArray;
             
             if (facebookError.code==202 || facebookError.code==203) {
                 
-                
+                timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:
+                             [NSNumber numberWithBool:YES],@"ERROR",
+                             facebookError,@"ERROR_MESSEGE_CODE",
+                             [NSNumber numberWithInt:RKGetFacebookTimeLineErrorType_AccountError],@"RKGetTimeLineErrorType",nil];
                 
             }else if (facebookError.code==201){
                 
+                timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:
+                             [NSNumber numberWithBool:YES],@"ERROR",
+                             facebookError,@"ERROR_MESSEGE_CODE",
+                             [NSNumber numberWithInt:RKGetFacebookTimeLineErrorType_RequestError],@"RKGetTimeLineErrorType",
+                             nil];
             }else if (facebookError.code==200){
                 
+                timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:
+                             [NSNumber numberWithBool:YES],@"ERROR",
+                             facebookError,@"ERROR_MESSEGE_CODE",
+                             [NSNumber numberWithInt:RKGetFacebookTimeLineErrorType_DataIsNull],@"RKGetTimeLineErrorType",
+                             nil];
+
             }else{
                 
+                timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:
+                             [NSNumber numberWithBool:YES],@"ERROR",
+                             facebookError,@"ERROR_MESSEGE_CODE",
+                             [NSNumber numberWithInt:RKGetFacebookTimeLineErrorType_FacebookServerError],@"RKGetTimeLineErrorType",
+                             nil];
+            
             }
-            
-            
-            
-            timelineDic=[[NSDictionary alloc]initWithObjectsAndKeys:[NSNumber numberWithBool:YES],@"ERROR",facebookError,@"ERROR_MESSEGE_CODE", nil];
             
             NSLog(@"Facebook convert....Failured");
             
@@ -494,8 +504,8 @@
             
             if (setCountForComparison==set.count) {
                 
-                [duplicateIndex addIndex:index-1];
-                NSLog(@"duplicate index=%d",index-1);
+                [duplicateIndex addIndex:index];
+                NSLog(@"duplicate index=%d",index);
                 
             }else{
                 
@@ -515,25 +525,5 @@
     dispatch_semaphore_wait(wait_createNSSet, DISPATCH_TIME_FOREVER);
     
     return timelineMutableDic.copy;
-}
-#pragma mark - UIAlertViewDelegate
--(void)alertViewPressButton:(MODropAlertView *)alertView buttonType:(DropAlertButtonType)buttonType{
-    NSLog(@"%s",__func__);
-    
-    switch (buttonType) {
-            
-        case DropAlertButtonOK:{
-            
-            NSURL*url=[NSURL URLWithString:UIApplicationOpenSettingsURLString];
-            [[UIApplication sharedApplication] openURL:url];
-            break;
-            
-        }default:
-            
-            NSLog(@"%s",__func__);
-            break;
-            
-    }
-    
 }
 @end

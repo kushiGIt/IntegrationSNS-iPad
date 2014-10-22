@@ -15,12 +15,13 @@
 #import "TWMessageBarManager.h"
 #import "SJNotificationViewController.h"
 
-typedef NS_ENUM(NSInteger, RKGetFacebookTimeLineError){
-    RKGetFacebookTimeLineErrorType_AccountError,
-    RKGetFacebookTimeLineErrorType_RequestError,
-    RKGetFacebookTimeLineErrorType_DataIsNull,
-    RKGetFacebookTimeLineErrorType_FacebookServerError
-};
+typedef enum{
+    RKGetFacebookTimeLineErrorType_Success=0,
+    RKGetFacebookTimeLineErrorType_AccountError=1,
+    RKGetFacebookTimeLineErrorType_RequestError=2,
+    RKGetFacebookTimeLineErrorType_DataIsNull=3,
+    RKGetFacebookTimeLineErrorType_FacebookServerError=4
+}RKGetFacebookTimeLineError;
 
 
 
