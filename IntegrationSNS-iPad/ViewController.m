@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "GetFaceBookTimeLine.h"
 #define USER_IMAGE_VIEW_TAG 1
 #define USER_NAME_VIEW_TAG 2
 #define CREATED_TIME_LABEL_TAG 3
@@ -1126,7 +1127,6 @@
     
 }
 #pragma mark get facebook newsfeed picture
-#warning I must verify this code....
 -(NSMutableDictionary*)getFacebookNewsFeedPicture_withImageDic:(NSDictionary*)imageDic{
     
     NSLog(@"=====GET_FACEBOOK_NEWSFEED_IMEGE_RESULTS=====");
