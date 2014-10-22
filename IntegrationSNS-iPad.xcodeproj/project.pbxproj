@@ -19,6 +19,7 @@
 		779A021B19E8C51300470C71 /* SJNotificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 779A021A19E8C51300470C71 /* SJNotificationViewController.m */; };
 		779A021E19E8C60D00470C71 /* SJNotificationViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 779A021D19E8C60D00470C71 /* SJNotificationViewController.xib */; };
 		77BA830919F68FF100534608 /* GetFaceBookTimeLine.m in Sources */ = {isa = PBXBuildFile; fileRef = 77BA830819F68FF100534608 /* GetFaceBookTimeLine.m */; };
+		77BA830C19F7D8E100534608 /* GetTwitterTimeline.m in Sources */ = {isa = PBXBuildFile; fileRef = 77BA830B19F7D8E100534608 /* GetTwitterTimeline.m */; };
 		77F2521719CF31C100DC9DEF /* MODropAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F2521419CF31C100DC9DEF /* MODropAlertView.m */; };
 		77F2521819CF31C100DC9DEF /* UIImage+ImageEffects.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F2521619CF31C100DC9DEF /* UIImage+ImageEffects.m */; };
 		77F916D419DFE99500F26D7F /* icon-error.png in Resources */ = {isa = PBXBuildFile; fileRef = 77F916CB19DFE99500F26D7F /* icon-error.png */; };
@@ -64,6 +65,8 @@
 		779A021D19E8C60D00470C71 /* SJNotificationViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = SJNotificationViewController.xib; path = ../SJNotificationViewController.xib; sourceTree = "<group>"; };
 		77BA830719F68FF100534608 /* GetFaceBookTimeLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GetFaceBookTimeLine.h; sourceTree = "<group>"; };
 		77BA830819F68FF100534608 /* GetFaceBookTimeLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GetFaceBookTimeLine.m; sourceTree = "<group>"; };
+		77BA830A19F7D8E100534608 /* GetTwitterTimeline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GetTwitterTimeline.h; sourceTree = "<group>"; };
+		77BA830B19F7D8E100534608 /* GetTwitterTimeline.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GetTwitterTimeline.m; sourceTree = "<group>"; };
 		77D4D13A19D0612300A5BA35 /* IntegrationSNS-iPad.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "IntegrationSNS-iPad.entitlements"; sourceTree = "<group>"; };
 		77F2521319CF31C100DC9DEF /* MODropAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MODropAlertView.h; sourceTree = "<group>"; };
 		77F2521419CF31C100DC9DEF /* MODropAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MODropAlertView.m; sourceTree = "<group>"; };
@@ -107,6 +110,8 @@
 		773AB0CF19CF24BC009B46BA = {
 			isa = PBXGroup;
 			children = (
+				77BA830A19F7D8E100534608 /* GetTwitterTimeline.h */,
+				77BA830B19F7D8E100534608 /* GetTwitterTimeline.m */,
 				77BA830719F68FF100534608 /* GetFaceBookTimeLine.h */,
 				77BA830819F68FF100534608 /* GetFaceBookTimeLine.m */,
 				77F916E319E00D6800F26D7F /* Framework */,
@@ -370,6 +375,7 @@
 				773AB0E419CF24BC009B46BA /* ViewController.m in Sources */,
 				773AB0E119CF24BC009B46BA /* AppDelegate.m in Sources */,
 				773AB0DE19CF24BC009B46BA /* main.m in Sources */,
+				77BA830C19F7D8E100534608 /* GetTwitterTimeline.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

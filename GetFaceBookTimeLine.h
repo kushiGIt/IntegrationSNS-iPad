@@ -10,10 +10,6 @@
 #import <UIKit/UIKit.h>
 #import <Accounts/Accounts.h>
 #import <Social/Social.h>
-#import "Reachability.h"
-#import "MODropAlertView.h"
-#import "TWMessageBarManager.h"
-#import "SJNotificationViewController.h"
 
 typedef enum{
     RKGetFacebookTimeLineErrorType_Success=0,
