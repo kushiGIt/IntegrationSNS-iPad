@@ -110,10 +110,6 @@
 		773AB0CF19CF24BC009B46BA = {
 			isa = PBXGroup;
 			children = (
-				77BA830A19F7D8E100534608 /* GetTwitterTimeline.h */,
-				77BA830B19F7D8E100534608 /* GetTwitterTimeline.m */,
-				77BA830719F68FF100534608 /* GetFaceBookTimeLine.h */,
-				77BA830819F68FF100534608 /* GetFaceBookTimeLine.m */,
 				77F916E319E00D6800F26D7F /* Framework */,
 				77F916E219E00D3B00F26D7F /* Reachability */,
 				77F916DC19E009A700F26D7F /* AlertClass */,
@@ -136,6 +132,7 @@
 		773AB0DA19CF24BC009B46BA /* IntegrationSNS-iPad */ = {
 			isa = PBXGroup;
 			children = (
+				77BA830D19F7E0C200534608 /* GetTimeLineClass */,
 				773AB0EA19CF24BC009B46BA /* LaunchScreen.xib */,
 				773AB0E519CF24BC009B46BA /* Main.storyboard */,
 				773AB0DF19CF24BC009B46BA /* AppDelegate.h */,
@@ -185,6 +182,18 @@
 				779A021A19E8C51300470C71 /* SJNotificationViewController.m */,
 			);
 			name = SJNotificationViewController;
+			sourceTree = "<group>";
+		};
+		77BA830D19F7E0C200534608 /* GetTimeLineClass */ = {
+			isa = PBXGroup;
+			children = (
+				77BA830A19F7D8E100534608 /* GetTwitterTimeline.h */,
+				77BA830B19F7D8E100534608 /* GetTwitterTimeline.m */,
+				77BA830719F68FF100534608 /* GetFaceBookTimeLine.h */,
+				77BA830819F68FF100534608 /* GetFaceBookTimeLine.m */,
+			);
+			name = GetTimeLineClass;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		77F2521219CF31C100DC9DEF /* MODropAlert */ = {

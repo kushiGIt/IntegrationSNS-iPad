@@ -38,6 +38,8 @@
     mytableview.dataSource=self;
     NSLog(@"%@",mytableview.delegate);
     NSLog(@"%@",mytableview.dataSource);
+    
+    
 }
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
