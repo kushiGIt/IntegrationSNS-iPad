@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface CollectionViewController : UICollectionViewController
+@interface CollectionViewControllerClass : UICollectionViewController
 
 - (UICollectionViewController*)nextViewControllerAtPoint:(CGPoint)point;
 

@@ -6,17 +6,17 @@
 //  Copyright (c) 2014年 RyousukeKushihata. All rights reserved.
 //
 
-#import "CollectionViewController.h"
+#import "CollectionViewControllerClass.h"
 #import "CollectionViewTransitionLayout.h"
 
 #define MAX_COUNT 20
 #define CELL_ID @"CELL_ID"
 
-@interface CollectionViewController ()
+@interface CollectionViewControllerClass ()
 
 @end
 
-@implementation CollectionViewController
+@implementation CollectionViewControllerClass
 - (id)initWithCollectionViewLayout:(UICollectionViewFlowLayout *)layout
 {
     if (self = [super initWithCollectionViewLayout:layout])
@@ -75,7 +75,7 @@
     [super viewWillAppear:animated];
     
     // Adjust scrollView decelerationRate
-    self.collectionView.decelerationRate = self.class != [CollectionViewController class] ? UIScrollViewDecelerationRateNormal : UIScrollViewDecelerationRateFast;
+    self.collectionView.decelerationRate = self.class != [CollectionViewControllerClass class] ? UIScrollViewDecelerationRateNormal : UIScrollViewDecelerationRateFast;
 }
 
 @end
