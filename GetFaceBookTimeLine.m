@@ -338,9 +338,6 @@
     //Get data from URL
     dispatch_semaphore_t seamphone_GetDataWait_=dispatch_semaphore_create(0);
     dispatch_sync(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0),^{
-        
-        dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0);
-        dispatch_sync(queue, ^{
             
             BOOL isNeed=YES;
             
@@ -379,7 +376,8 @@
             
             dispatch_semaphore_signal(seamphone_GetDataWait_);
         });
-    });
+    dispatch_semaphore_wait(seamphone_GetDataWait_, DISPATCH_TIME_FOREVER);
+    
     NSLog(@"======================END=======================");
     return convertedNewsfeedImage;
 }

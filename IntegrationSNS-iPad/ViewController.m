@@ -144,6 +144,9 @@
     
     return cell;
 }
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return 948;
+}
 #pragma mark - convert date to string
 -(NSString*)dateToString:(NSDate *)baseDate formatString:(NSString *)formatString{
     
@@ -320,7 +323,12 @@
                     
                     break;
                     
-                }}
+                }case RKGetFacebookTimeLineErrorType_Success:{
+                    
+                    break;
+                
+                }
+            }
             
             //twitter
             switch ([[gotTwitterTimeLineDic objectForKey:@"RKGetTimeLineErrorType"]intValue]) {
@@ -361,6 +369,10 @@
                     
                     break;
                 
+                }case RKGetTwiiterTimeLineErrorType_Success:{
+                    
+                    break;
+                    
                 }
             }
             

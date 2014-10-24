@@ -32,6 +32,7 @@
 		77F916DB19DFE99500F26D7F /* TWMessageBarManager.podspec in Resources */ = {isa = PBXBuildFile; fileRef = 77F916D319DFE99500F26D7F /* TWMessageBarManager.podspec */; };
 		77F916DF19E00CE700F26D7F /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F916DE19E00CE700F26D7F /* Reachability.m */; };
 		77F916E119E00CF400F26D7F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77F916E019E00CF400F26D7F /* SystemConfiguration.framework */; };
+		77FD0AC819FA4A2000BE3633 /* CollectionViewBigLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 77FD0AC719FA4A2000BE3633 /* CollectionViewBigLayout.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +85,8 @@
 		77F916DD19E00CE700F26D7F /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		77F916DE19E00CE700F26D7F /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
 		77F916E019E00CF400F26D7F /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		77FD0AC619FA4A2000BE3633 /* CollectionViewBigLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollectionViewBigLayout.h; sourceTree = "<group>"; };
+		77FD0AC719FA4A2000BE3633 /* CollectionViewBigLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollectionViewBigLayout.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +113,8 @@
 		773AB0CF19CF24BC009B46BA = {
 			isa = PBXGroup;
 			children = (
+				77FD0AC619FA4A2000BE3633 /* CollectionViewBigLayout.h */,
+				77FD0AC719FA4A2000BE3633 /* CollectionViewBigLayout.m */,
 				77F916E319E00D6800F26D7F /* Framework */,
 				77F916E219E00D3B00F26D7F /* Reachability */,
 				77F916DC19E009A700F26D7F /* AlertClass */,
@@ -375,6 +380,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77FD0AC819FA4A2000BE3633 /* CollectionViewBigLayout.m in Sources */,
 				77F916DA19DFE99500F26D7F /* TWMessageBarManager.m in Sources */,
 				77F2521719CF31C100DC9DEF /* MODropAlertView.m in Sources */,
 				77F2521819CF31C100DC9DEF /* UIImage+ImageEffects.m in Sources */,
