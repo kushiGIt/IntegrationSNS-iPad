@@ -33,6 +33,9 @@
 		77F916DF19E00CE700F26D7F /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 77F916DE19E00CE700F26D7F /* Reachability.m */; };
 		77F916E119E00CF400F26D7F /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 77F916E019E00CF400F26D7F /* SystemConfiguration.framework */; };
 		77FD0AC819FA4A2000BE3633 /* CollectionViewBigLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 77FD0AC719FA4A2000BE3633 /* CollectionViewBigLayout.m */; };
+		77FD0ACB19FA4A9E00BE3633 /* CollectionViewLayoutSmallLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 77FD0ACA19FA4A9E00BE3633 /* CollectionViewLayoutSmallLayout.m */; };
+		77FD0ACE19FA4B6C00BE3633 /* CollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 77FD0ACD19FA4B6C00BE3633 /* CollectionViewController.m */; };
+		77FD0AD119FA4C3B00BE3633 /* CollectionViewTransitionLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 77FD0AD019FA4C3B00BE3633 /* CollectionViewTransitionLayout.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -87,6 +90,12 @@
 		77F916E019E00CF400F26D7F /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		77FD0AC619FA4A2000BE3633 /* CollectionViewBigLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollectionViewBigLayout.h; sourceTree = "<group>"; };
 		77FD0AC719FA4A2000BE3633 /* CollectionViewBigLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollectionViewBigLayout.m; sourceTree = "<group>"; };
+		77FD0AC919FA4A9E00BE3633 /* CollectionViewLayoutSmallLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollectionViewLayoutSmallLayout.h; sourceTree = "<group>"; };
+		77FD0ACA19FA4A9E00BE3633 /* CollectionViewLayoutSmallLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollectionViewLayoutSmallLayout.m; sourceTree = "<group>"; };
+		77FD0ACC19FA4B6C00BE3633 /* CollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollectionViewController.h; sourceTree = "<group>"; };
+		77FD0ACD19FA4B6C00BE3633 /* CollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollectionViewController.m; sourceTree = "<group>"; };
+		77FD0ACF19FA4C3B00BE3633 /* CollectionViewTransitionLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CollectionViewTransitionLayout.h; sourceTree = "<group>"; };
+		77FD0AD019FA4C3B00BE3633 /* CollectionViewTransitionLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollectionViewTransitionLayout.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +122,12 @@
 		773AB0CF19CF24BC009B46BA = {
 			isa = PBXGroup;
 			children = (
+				77FD0ACF19FA4C3B00BE3633 /* CollectionViewTransitionLayout.h */,
+				77FD0AD019FA4C3B00BE3633 /* CollectionViewTransitionLayout.m */,
+				77FD0ACC19FA4B6C00BE3633 /* CollectionViewController.h */,
+				77FD0ACD19FA4B6C00BE3633 /* CollectionViewController.m */,
+				77FD0AC919FA4A9E00BE3633 /* CollectionViewLayoutSmallLayout.h */,
+				77FD0ACA19FA4A9E00BE3633 /* CollectionViewLayoutSmallLayout.m */,
 				77FD0AC619FA4A2000BE3633 /* CollectionViewBigLayout.h */,
 				77FD0AC719FA4A2000BE3633 /* CollectionViewBigLayout.m */,
 				77F916E319E00D6800F26D7F /* Framework */,
@@ -386,9 +401,12 @@
 				77F2521819CF31C100DC9DEF /* UIImage+ImageEffects.m in Sources */,
 				77F916DF19E00CE700F26D7F /* Reachability.m in Sources */,
 				77BA830919F68FF100534608 /* GetFaceBookTimeLine.m in Sources */,
+				77FD0AD119FA4C3B00BE3633 /* CollectionViewTransitionLayout.m in Sources */,
 				779A021B19E8C51300470C71 /* SJNotificationViewController.m in Sources */,
 				773AB0E419CF24BC009B46BA /* ViewController.m in Sources */,
+				77FD0ACB19FA4A9E00BE3633 /* CollectionViewLayoutSmallLayout.m in Sources */,
 				773AB0E119CF24BC009B46BA /* AppDelegate.m in Sources */,
+				77FD0ACE19FA4B6C00BE3633 /* CollectionViewController.m in Sources */,
 				773AB0DE19CF24BC009B46BA /* main.m in Sources */,
 				77BA830C19F7D8E100534608 /* GetTwitterTimeline.m in Sources */,
 			);
