@@ -16,6 +16,11 @@
 		773AB0F819CF24BC009B46BA /* IntegrationSNS_iPadTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 773AB0F719CF24BC009B46BA /* IntegrationSNS_iPadTests.m */; };
 		773AB10419CF251D009B46BA /* Accounts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 773AB10319CF251D009B46BA /* Accounts.framework */; };
 		773AB10619CF2525009B46BA /* Social.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 773AB10519CF2525009B46BA /* Social.framework */; };
+		7796720319FA5461003ECC6A /* 2.png in Resources */ = {isa = PBXBuildFile; fileRef = 779671FE19FA5461003ECC6A /* 2.png */; };
+		7796720419FA5461003ECC6A /* five.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 779671FF19FA5461003ECC6A /* five.jpg */; };
+		7796720519FA5461003ECC6A /* one.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 7796720019FA5461003ECC6A /* one.jpg */; };
+		7796720619FA5461003ECC6A /* three.png in Resources */ = {isa = PBXBuildFile; fileRef = 7796720119FA5461003ECC6A /* three.png */; };
+		7796720719FA5461003ECC6A /* two.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 7796720219FA5461003ECC6A /* two.jpg */; };
 		779A021B19E8C51300470C71 /* SJNotificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 779A021A19E8C51300470C71 /* SJNotificationViewController.m */; };
 		779A021E19E8C60D00470C71 /* SJNotificationViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 779A021D19E8C60D00470C71 /* SJNotificationViewController.xib */; };
 		77BA830919F68FF100534608 /* GetFaceBookTimeLine.m in Sources */ = {isa = PBXBuildFile; fileRef = 77BA830819F68FF100534608 /* GetFaceBookTimeLine.m */; };
@@ -66,6 +71,11 @@
 		773AB0F719CF24BC009B46BA /* IntegrationSNS_iPadTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = IntegrationSNS_iPadTests.m; sourceTree = "<group>"; };
 		773AB10319CF251D009B46BA /* Accounts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accounts.framework; path = System/Library/Frameworks/Accounts.framework; sourceTree = SDKROOT; };
 		773AB10519CF2525009B46BA /* Social.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Social.framework; path = System/Library/Frameworks/Social.framework; sourceTree = SDKROOT; };
+		779671FE19FA5461003ECC6A /* 2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = 2.png; path = ../2.png; sourceTree = "<group>"; };
+		779671FF19FA5461003ECC6A /* five.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = five.jpg; path = ../five.jpg; sourceTree = "<group>"; };
+		7796720019FA5461003ECC6A /* one.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = one.jpg; path = ../one.jpg; sourceTree = "<group>"; };
+		7796720119FA5461003ECC6A /* three.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = three.png; path = ../three.png; sourceTree = "<group>"; };
+		7796720219FA5461003ECC6A /* two.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = two.jpg; path = ../two.jpg; sourceTree = "<group>"; };
 		779A021919E8C51300470C71 /* SJNotificationViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SJNotificationViewController.h; path = ../SJNotificationViewController.h; sourceTree = "<group>"; };
 		779A021A19E8C51300470C71 /* SJNotificationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SJNotificationViewController.m; path = ../SJNotificationViewController.m; sourceTree = "<group>"; };
 		779A021D19E8C60D00470C71 /* SJNotificationViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = SJNotificationViewController.xib; path = ../SJNotificationViewController.xib; sourceTree = "<group>"; };
@@ -152,8 +162,8 @@
 		773AB0DA19CF24BC009B46BA /* IntegrationSNS-iPad */ = {
 			isa = PBXGroup;
 			children = (
-				77FD0AD519FA4EDC00BE3633 /* CollectionViewClass */,
 				77BA830D19F7E0C200534608 /* GetTimeLineClass */,
+				77FD0AD519FA4EDC00BE3633 /* CollectionViewClass */,
 				773AB0EA19CF24BC009B46BA /* LaunchScreen.xib */,
 				773AB0E519CF24BC009B46BA /* Main.storyboard */,
 				773AB0DF19CF24BC009B46BA /* AppDelegate.h */,
@@ -188,6 +198,11 @@
 		773AB0F519CF24BC009B46BA /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				779671FE19FA5461003ECC6A /* 2.png */,
+				779671FF19FA5461003ECC6A /* five.jpg */,
+				7796720019FA5461003ECC6A /* one.jpg */,
+				7796720119FA5461003ECC6A /* three.png */,
+				7796720219FA5461003ECC6A /* two.jpg */,
 				773AB10519CF2525009B46BA /* Social.framework */,
 				773AB10319CF251D009B46BA /* Accounts.framework */,
 				773AB0F619CF24BC009B46BA /* Info.plist */,
@@ -386,17 +401,22 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7796720719FA5461003ECC6A /* two.jpg in Resources */,
 				77F916D619DFE99500F26D7F /* icon-info.png in Resources */,
 				779A021E19E8C60D00470C71 /* SJNotificationViewController.xib in Resources */,
 				77F916D819DFE99500F26D7F /* icon-success.png in Resources */,
+				7796720419FA5461003ECC6A /* five.jpg in Resources */,
 				773AB0E719CF24BC009B46BA /* Main.storyboard in Resources */,
 				77F916D519DFE99500F26D7F /* icon-error@2x.png in Resources */,
 				77F916D919DFE99500F26D7F /* icon-success@2x.png in Resources */,
+				7796720319FA5461003ECC6A /* 2.png in Resources */,
 				773AB0EC19CF24BC009B46BA /* LaunchScreen.xib in Resources */,
 				773AB0E919CF24BC009B46BA /* Images.xcassets in Resources */,
 				77F916DB19DFE99500F26D7F /* TWMessageBarManager.podspec in Resources */,
 				77F916D419DFE99500F26D7F /* icon-error.png in Resources */,
+				7796720519FA5461003ECC6A /* one.jpg in Resources */,
 				77F916D719DFE99500F26D7F /* icon-info@2x.png in Resources */,
+				7796720619FA5461003ECC6A /* three.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -557,6 +577,7 @@
 				INFOPLIST_FILE = "IntegrationSNS-iPad/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -568,6 +589,7 @@
 				INFOPLIST_FILE = "IntegrationSNS-iPad/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

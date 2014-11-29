@@ -304,9 +304,7 @@
                     SJNotificationViewController*_notificationController = [[SJNotificationViewController alloc] initWithNibName:@"SJNotificationViewController" bundle:nil];
                     [_notificationController setParentView:self.view];
                     [_notificationController setTapTarget:self selector:nil];
-                    [_notificationController setNotificationLevel:SJNotificationLevelMessage];
-                    [_notificationController setNotificationPosition:SJNotificationPositionBottom];
-                    [_notificationController setNotificationTitle:@"新しい投稿はありません。"];
+                    //[_notificationController setNotificationTitle:@"新しい投稿はありません。"];
                     [_notificationController show];
                     
                     break;
